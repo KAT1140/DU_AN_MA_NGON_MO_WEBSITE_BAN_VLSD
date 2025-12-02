@@ -1,4 +1,7 @@
-<?php require 'config.php'; ?>
+<?php 
+require 'config.php'; 
+header('Content-Type: text/html; charset=utf-8');
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,6 +9,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VLXD KAT - Vật Liệu Xây Dựng</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     .toast {
       position: fixed;
@@ -47,6 +51,11 @@
         <h1 class="text-3xl font-black">VLXD</h1>
       </a>
       <div class="flex items-center gap-8">
+        <nav class="flex items-center gap-6">
+          <a href="products.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2">
+            <i class="fas fa-box"></i> Sản phẩm
+          </a>
+        </nav>
         <div class="flex items-center gap-3">
           <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
             <div class="flex items-center gap-3">
@@ -109,19 +118,27 @@
     <div class="grid md:grid-cols-4 gap-8">
       <?php
       $cat_id = $_GET['cat'] ?? '';
-      $sql = "SELECT * FROM products WHERE is_featured = 1";
+      $sql = "SELECT id, NAME, price, sale_price, images FROM products WHERE STATUS='active'";
       if (!empty($cat_id)) {
           $cat_id = (int)$cat_id;
           $sql .= " AND category_id = $cat_id";
+      } else {
+          // Nếu không chọn danh mục, lấy sản phẩm nổi bật + 1-2 sản phẩm thép
+          $sql .= " AND (is_featured = 1 OR id IN (13, 14))"; // Chỉ 2 sản phẩm thép (id 13, 14)
       }
+      $sql .= " ORDER BY is_featured DESC, created_at DESC LIMIT 8";
       $result = $conn->query($sql);
 
       if ($result && $result->num_rows > 0) {
           while ($p = $result->fetch_assoc()) {
+              $images = json_decode($p['images'], true);
+              $image_url = !empty($images) ? $images[0] : 'https://via.placeholder.com/300x300?text=No+Image';
+              $display_price = $p['sale_price'] ?? $p['price'];
+              
               echo "<div class='bg-white rounded-2xl shadow-2xl p-6 text-center hover:shadow-3xl transition'>
-                      <div class='bg-gray-200 h-48 rounded-xl mb-6'></div>
-                      <h3 class='font-bold text-xl mb-2'>{$p['NAME']}</h3>
-                      <p class='text-3xl font-black text-orange-600 mb-6'>" . number_format($p['price']) . "đ</p>
+                      <img src='" . htmlspecialchars($image_url) . "' alt='" . htmlspecialchars($p['NAME']) . "' class='bg-gray-200 h-48 w-full object-cover rounded-xl mb-6'>
+                      <h3 class='font-bold text-xl mb-2 line-clamp-2'>" . htmlspecialchars($p['NAME']) . "</h3>
+                      <p class='text-3xl font-black text-orange-600 mb-6'>" . number_format($display_price, 0, ',', '.') . "đ</p>
                       <form action='add_to_cart.php' method='POST'>
                         <input type='hidden' name='product_id' value='{$p['id']}'>
                         <input type='hidden' name='quantity' value='1'>

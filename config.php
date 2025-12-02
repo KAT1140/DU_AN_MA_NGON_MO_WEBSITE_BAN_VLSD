@@ -11,14 +11,22 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$conn = new mysqli("localhost", "root", "", "vlxd_store");
+$conn = new mysqli("localhost", "root", "", "vlxd_store1");
 
 if ($conn->connect_error) die("Kết nối thất bại!");
 
+// Set charset to UTF-8
+$conn->set_charset("utf8mb4");
+
 // Auto create tables if not exist
 if (!isset($_SESSION['tables_created'])) {
-    // Create users table
-    $conn->query("CREATE TABLE IF NOT EXISTS users (
+    // Only create tables if they don't exist
+    $tables_check = $conn->query("SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = 'vlxd_store1'");
+    $result = $tables_check->fetch_assoc();
+    
+    if ($result['count'] < 11) {  // If less than 11 tables exist
+        // Create users table
+        $conn->query("CREATE TABLE IF NOT EXISTS users (
         id INT PRIMARY KEY AUTO_INCREMENT,
         email VARCHAR(255) UNIQUE NOT NULL,
         PASSWORD VARCHAR(255),
@@ -133,24 +141,27 @@ if (!isset($_SESSION['tables_created'])) {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
     $_SESSION['tables_created'] = true;
+    }
 }
 
 // Ensure `role` column exists on users table (for role-based access)
-$colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'role'");
-if ($colCheck && $colCheck->num_rows === 0) {
-    $conn->query("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'user'");
-}
-
-// Ensure `google_id` column exists (for Google OAuth)
-$colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'google_id'");
-if ($colCheck && $colCheck->num_rows === 0) {
-    $conn->query("ALTER TABLE users ADD COLUMN google_id VARCHAR(255)");
-}
-
-// Ensure `avatar_url` column exists (for Google profile picture)
-$colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'avatar_url'");
-if ($colCheck && $colCheck->num_rows === 0) {
-    $conn->query("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)");
+if ($conn->query("SELECT 1 FROM users LIMIT 1") !== false) {
+    $colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'role'");
+    if ($colCheck && $colCheck->num_rows === 0) {
+        $conn->query("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'user'");
+    }
+    
+    // Ensure `google_id` column exists (for Google OAuth)
+    $colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'google_id'");
+    if ($colCheck && $colCheck->num_rows === 0) {
+        $conn->query("ALTER TABLE users ADD COLUMN google_id VARCHAR(255)");
+    }
+    
+    // Ensure `avatar_url` column exists
+    $colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'avatar_url'");
+    if ($colCheck && $colCheck->num_rows === 0) {
+        $conn->query("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)");
+    }
 }
 
 // If a dev admin email is configured, ensure that user exists and set role=admin
