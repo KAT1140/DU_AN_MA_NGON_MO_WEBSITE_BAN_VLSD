@@ -1,79 +1,90 @@
 <?php
+ob_start();
+session_start();
 require 'config.php';
 
-header('Content-Type: application/json');
+// Bật báo lỗi dạng JSON để dễ debug (Tắt khi deploy thật)
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
 
-// Expect product_id and quantity
-if (!empty($_POST['product_id']) && isset($_POST['quantity'])) {
+header('Content-Type: application/json; charset=utf-8');
+
+$response = ['success' => false, 'message' => 'Lỗi không xác định'];
+
+try {
+    if (empty($_POST['product_id']) || !isset($_POST['quantity'])) {
+        throw new Exception('Thiếu dữ liệu gửi lên');
+    }
+
     $product_id = (int)$_POST['product_id'];
     $quantity = max(1, (int)$_POST['quantity']);
-    $session = $_SESSION['cart_id'];
-    $user_id = $_SESSION['user_id'] ?? null;
-
-    // Verify product exists and get price
-    $stmt = $conn->prepare("SELECT id, price FROM products WHERE id = ? LIMIT 1");
-    $stmt->bind_param('i', $product_id);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    if (!$res || $res->num_rows === 0) {
-        echo json_encode(['success' => false, 'message' => '❌ Lỗi: Sản phẩm không tồn tại!']);
-        exit;
+    
+    // 1. Kiểm tra session giỏ hàng
+    if (!isset($_SESSION['cart_id'])) {
+        $_SESSION['cart_id'] = session_id();
     }
-    $prod = $res->fetch_assoc();
-    $price = (float)$prod['price'];
-    $stmt->close();
+    $session_val = $_SESSION['cart_id'];
 
-    // Find or create cart header for this session (or user)
-    $cart_id = null;
-    $sql = "SELECT id FROM cart WHERE session_id = '" . $conn->real_escape_string($session) . "' LIMIT 1";
-    $r = $conn->query($sql);
-    if ($r && $r->num_rows > 0) {
-        $cart_row = $r->fetch_assoc();
-        $cart_id = (int)$cart_row['id'];
-    } else {
-        $stmt = $conn->prepare("INSERT INTO cart (user_id, session_id, quantity, created_at, updated_at) VALUES (?, ?, 0, NOW(), NOW())");
-        $uid = $user_id ?? 0;
-        $stmt->bind_param('is', $uid, $session);
-        if ($stmt->execute()) {
-            $cart_id = (int)$conn->insert_id;
+    // 2. Lấy user_id nếu đã đăng nhập
+    $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'NULL';
+
+    // 3. Lấy giá sản phẩm
+    $sql_price = "SELECT price FROM products WHERE id = $product_id";
+    $res = $conn->query($sql_price);
+
+    if (!$res || $res->num_rows === 0) { 
+        throw new Exception('Sản phẩm không tồn tại');
+    }
+    $price = (float)$res->fetch_assoc()['price'];
+
+    // 4. Tìm giỏ hàng hiện tại (Check cả session_id lẫn user_id nếu có)
+    $cart_sql = "SELECT id FROM cart WHERE session_id = '$session_val'";
+    if ($user_id !== 'NULL') {
+        $cart_sql .= " OR user_id = $user_id";
+    }
+    $cart_res = $conn->query($cart_sql);
+
+    if ($cart_res && $cart_res->num_rows > 0) {
+        $cart_row = $cart_res->fetch_assoc();
+        $cart_id = $cart_row['id'];
+        
+        // Nếu user đã đăng nhập mà cart này chưa có user_id -> Update user_id vào
+        if ($user_id !== 'NULL') {
+            $conn->query("UPDATE cart SET user_id = $user_id WHERE id = $cart_id AND user_id IS NULL");
         }
-        $stmt->close();
-    }
-
-    if (!$cart_id) {
-        echo json_encode(['success' => false, 'message' => '❌ Lỗi: Không thể tạo giỏ hàng.']);
-        exit;
-    }
-
-    // Check if cart_items already has this product
-    $stmt = $conn->prepare("SELECT id, quantity FROM cart_items WHERE cart_id = ? AND product_id = ? LIMIT 1");
-    $stmt->bind_param('ii', $cart_id, $product_id);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    if ($res && $res->num_rows > 0) {
-        $row = $res->fetch_assoc();
-        $newQty = (int)$row['quantity'] + $quantity;
-        $ci_id = (int)$row['id'];
-        $stmt2 = $conn->prepare("UPDATE cart_items SET quantity = ?, price = ?, updated_at = NOW() WHERE id = ?");
-        $stmt2->bind_param('idi', $newQty, $price, $ci_id);
-        $ok = $stmt2->execute();
-        $stmt2->close();
     } else {
-        $stmt2 = $conn->prepare("INSERT INTO cart_items (cart_id, product_id, quantity, price, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())");
-        $stmt2->bind_param('iiid', $cart_id, $product_id, $quantity, $price);
-        $ok = $stmt2->execute();
-        $stmt2->close();
+        // Tạo giỏ hàng mới
+        // Lưu ý: $user_id ở đây là số hoặc chuỗi 'NULL', nên không bọc dấu nháy trong SQL
+        $insert_sql = "INSERT INTO cart (session_id, user_id, created_at) VALUES ('$session_val', $user_id, NOW())";
+        if (!$conn->query($insert_sql)) {
+            throw new Exception('Lỗi tạo giỏ hàng: ' . $conn->error);
+        }
+        $cart_id = $conn->insert_id;
     }
 
-    if ($ok) {
-        // Optionally update cart.quantity summary
-        $conn->query("UPDATE cart SET quantity = (SELECT IFNULL(SUM(quantity),0) FROM cart_items WHERE cart_id = $cart_id), updated_at = NOW() WHERE id = $cart_id");
-        echo json_encode(['success' => true, 'message' => "✅ Đã thêm $quantity sản phẩm vào giỏ hàng!"]);
+    // 5. Thêm/Cập nhật sản phẩm vào cart_items
+    $check = $conn->query("SELECT id FROM cart_items WHERE cart_id = $cart_id AND product_id = $product_id");
+    if ($check->num_rows > 0) {
+        $row = $check->fetch_assoc();
+        $conn->query("UPDATE cart_items SET quantity = quantity + $quantity, price = $price WHERE id = " . $row['id']);
     } else {
-        echo json_encode(['success' => false, 'message' => '❌ Lỗi khi thêm vào giỏ hàng']);
+        $conn->query("INSERT INTO cart_items (cart_id, product_id, quantity, price) VALUES ($cart_id, $product_id, $quantity, $price)");
     }
 
-} else {
-    echo json_encode(['success' => false, 'message' => '❌ Thiếu thông tin sản phẩm']);
+    // 6. Tính tổng số lượng mới để update icon
+    $total_res = $conn->query("SELECT SUM(quantity) as total FROM cart_items WHERE cart_id = $cart_id");
+    $new_count = $total_res->fetch_assoc()['total'] ?? 0;
+
+    $response['success'] = true;
+    $response['message'] = "✅ Đã thêm vào giỏ hàng!";
+    $response['new_cart_count'] = (int)$new_count;
+
+} catch (Exception $e) {
+    $response['success'] = false;
+    $response['message'] = $e->getMessage();
 }
+
+ob_end_clean();
+echo json_encode($response);
+exit;
 ?>

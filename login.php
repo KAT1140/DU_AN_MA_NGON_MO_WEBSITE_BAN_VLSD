@@ -43,17 +43,14 @@ require 'config.php';
             data-login_uri="<?= $REDIRECT_URI ?>"
             data-auto_prompt="false">
           </div>
-          <div class="g_id_signin"
-               data-type="standard"
-               data-size="large"
-               data-theme="outline"
-               data-text="signin_with"
-               data-shape="pill"
-               data-logo_alignment="left"
-               style="display: flex; justify-content: center;">
-          </div>
+          <div 
+  class="g_id_signin" 
+  data-type="standard"       data-size="large"
+  data-theme="outline"
+  data-text="signin_with"    data-shape="pill"
+  data-logo_alignment="left">
+</div>
         </div>
-
         <!-- Divider -->
         <div class="flex items-center gap-4 my-8">
           <div class="flex-1 h-px bg-gray-300"></div>

@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Giỏ hàng - VLXD PRO</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -21,12 +22,19 @@
   <div class="max-w-6xl mx-auto px-6 py-8">
     <?php 
     // Lấy các mục trong giỏ (cart -> cart_items -> products)
-    $sql = "SELECT ci.id AS ci_id, ci.quantity AS ci_quantity, ci.price AS ci_price, p.id AS product_id, p.NAME AS product_name, p.images AS product_images
+    // Lấy ID người dùng nếu đã đăng nhập
+    $user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+    $sid = $conn->real_escape_string($cart_session);
+
+    // Truy vấn tìm giỏ hàng theo Session ID HOẶC User ID
+    $sql = "SELECT ci.id AS ci_id, ci.quantity AS ci_quantity, ci.price AS ci_price, 
+                   p.id AS product_id, p.NAME AS product_name, p.images AS product_images
       FROM cart c
       JOIN cart_items ci ON ci.cart_id = c.id
       LEFT JOIN products p ON p.id = ci.product_id
-      WHERE c.session_id = '" . $conn->real_escape_string($cart_session) . "'
+      WHERE (c.session_id = '$sid' OR (c.user_id = $user_id AND c.user_id > 0))
       ORDER BY ci.id DESC";
+    // --- KẾT THÚC SỬA ---
     $result = $conn->query($sql);
     if (!$result || $result->num_rows == 0): ?>
       <div class="text-center py-16">
@@ -193,135 +201,7 @@
       }
     }
   </style>
-
-  <script>
-    function showToast(message, isSuccess = true) {
-      const t = document.createElement('div');
-      t.className = 'toast' + (isSuccess ? '' : ' error');
-      t.textContent = message;
-      document.body.appendChild(t);
-      setTimeout(() => { 
-        t.style.opacity = '0';
-        t.style.transform = 'translateX(400px)';
-        setTimeout(() => t.remove(), 300);
-      }, 2500);
-    }
-
-    function updateTotal() {
-      let total = 0;
-      document.querySelectorAll('[data-ci-id]').forEach(row => {
-        const priceAttr = row.getAttribute('data-price');
-        const price = priceAttr ? parseFloat(priceAttr) : 0;
-        const qtyInput = row.querySelector('.qty-input');
-        const qty = qtyInput ? (parseInt(qtyInput.value) || 0) : 0;
-        const itemTotal = price * qty;
-        const itemTotalEl = row.querySelector('.item-total');
-        if (itemTotalEl) {
-          itemTotalEl.textContent = new Intl.NumberFormat('vi-VN').format(itemTotal) + 'đ';
-        }
-        total += itemTotal;
-      });
-      
-      const totalEl = document.querySelector('.total-price');
-      const finalEl = document.querySelector('.final-total');
-      const formattedTotal = new Intl.NumberFormat('vi-VN').format(total);
-      if (totalEl) totalEl.textContent = formattedTotal + 'đ';
-      if (finalEl) finalEl.textContent = formattedTotal + 'đ';
-    }
-
-    // Decrease quantity
-    document.querySelectorAll('.qty-decrease').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const ciId = btn.getAttribute('data-ci-id');
-        const input = document.querySelector(`.qty-input[data-ci-id="${ciId}"]`);
-        if (!input || !ciId) return;
-        let qty = parseInt(input.value) || 1;
-        if (qty > 1) {
-          qty--;
-          await updateQuantity(ciId, qty);
-        }
-      });
-    });
-
-    // Increase quantity
-    document.querySelectorAll('.qty-increase').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const ciId = btn.getAttribute('data-ci-id');
-        const input = document.querySelector(`.qty-input[data-ci-id="${ciId}"]`);
-        if (!input || !ciId) return;
-        let qty = parseInt(input.value) || 1;
-        if (qty < 999) {
-          qty++;
-          await updateQuantity(ciId, qty);
-        }
-      });
-    });
-
-    async function updateQuantity(ciId, newQty) {
-      if (!ciId || newQty < 1) return;
-      
-      const fd = new FormData();
-      fd.append('cart_item_id', ciId);
-      fd.append('quantity', newQty);
-
-      try {
-        const res = await fetch('update_cart.php', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (data.success) {
-          const input = document.querySelector(`.qty-input[data-ci-id="${ciId}"]`);
-          if (input) {
-            input.value = newQty;
-          }
-          updateTotal();
-          showToast('✅ ' + (data.message || 'Cập nhật giỏ hàng thành công'), true);
-        } else {
-          showToast('❌ ' + (data.message || 'Lỗi cập nhật'), false);
-        }
-      } catch (err) {
-        showToast('❌ Lỗi mạng: ' + err.message, false);
-      }
-    }
-
-    // Remove item
-    document.querySelectorAll('.remove-item').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const ciId = btn.getAttribute('data-ci-id');
-        if (!ciId) return;
-        if (!confirm('Xóa sản phẩm khỏi giỏ hàng?')) return;
-
-        const fd = new FormData();
-        fd.append('cart_item_id', ciId);
-
-        try {
-          const res = await fetch('remove_from_cart.php', { method: 'POST', body: fd });
-          const data = await res.json();
-          if (data.success) {
-            const row = document.querySelector(`[data-ci-id="${ciId}"]`).closest('[data-ci-id]');
-            row.style.opacity = '0';
-            row.style.transform = 'slideUp';
-            setTimeout(() => {
-              row.remove();
-              updateTotal();
-              if (!document.querySelector('[data-ci-id]')) {
-                location.reload();
-              }
-            }, 300);
-            showToast('Xóa sản phẩm thành công', true);
-          } else {
-            showToast(data.message || 'Lỗi khi xóa', false);
-          }
-        } catch (err) {
-          showToast('Lỗi mạng: ' + err.message, false);
-        }
-      });
-    });
-
-    // Checkout button
-    document.querySelector('.checkout-btn')?.addEventListener('click', () => {
-      alert('Tính năng thanh toán sẽ được cập nhật sớm!');
-    });
-  </script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/cart-page.js"></script>
 </body>
 </html>
