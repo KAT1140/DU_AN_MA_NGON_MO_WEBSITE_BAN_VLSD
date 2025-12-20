@@ -372,9 +372,5 @@ Copyright (c) 2025 KAT1140
 - [Google OAuth](https://developers.google.com/identity) - Authentication
 - [XAMPP](https://www.apachefriends.org/) - Development Environment
 
----
-
-⭐ Nếu project này hữu ích, hãy cho một star nhé! ⭐
-
 
 

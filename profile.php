@@ -166,8 +166,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <a href="admin_products.php" class="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 text-orange-700 px-4 py-2 rounded-lg transition font-bold text-sm">
                                     <i class="fas fa-boxes"></i> Sản phẩm
                                 </a>
+                                <a href="admin_orders.php" class="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-4 py-2 rounded-lg transition font-bold text-sm">
+                                    <i class="fas fa-shopping-cart"></i> Đơn hàng
+                                </a>
                             </div>
                         <?php endif; ?>
+                        
+                        <!-- User Links -->
+                        <div class="pt-4 border-t space-y-2">
+                            <p class="text-xs text-gray-500 font-bold uppercase">Tài khoản</p>
+                            <a href="my_orders.php" class="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-2 rounded-lg transition font-bold text-sm">
+                                <i class="fas fa-shopping-bag"></i> Đơn hàng của tôi
+                            </a>
+                            <a href="addresses.php" class="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg transition font-bold text-sm">
+                                <i class="fas fa-map-marker-alt"></i> Địa chỉ giao hàng
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -61,7 +61,7 @@ if ($cart_result->num_rows > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh Toán - VLXD PRO</title>
+    <title>Thanh Toán - VLXD KAT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -79,16 +79,40 @@ if ($cart_result->num_rows > 0) {
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="index.php" class="text-2xl font-bold text-orange-600 flex items-center gap-2">
-                <i class="fas fa-hammer"></i> VLXD PRO
+    <header class="bg-gradient-to-r from-orange-500 to-amber-500 text-white sticky top-0 z-50 shadow-xl">
+        <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+            <a href="index.php" class="flex items-center gap-4 hover:opacity-90 transition">
+                <img src="uploads/logo.png" alt="VLXD Logo" class="w-16 h-16 object-cover rounded-full">
+                <h1 class="text-3xl font-black">VLXD KAT</h1>
             </a>
-            <div class="flex items-center gap-4">
-                <span class="text-gray-700"><i class="fas fa-shopping-bag"></i> Thanh toán</span>
-                <a href="cart.php" class="text-gray-600 hover:text-orange-600">
-                    <i class="fas fa-shopping-cart"></i> Giỏ hàng
+            <div class="flex items-center gap-8">
+                <nav class="flex items-center gap-6">
+                    <a href="index.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2">
+                        <i class="fas fa-home"></i> Trang chủ
+                    </a>
+                    <a href="products.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2">
+                        <i class="fas fa-box"></i> Sản phẩm
+                    </a>
+                </nav>
+                
+                <div class="flex items-center gap-3">
+                    <a href="profile.php" class="text-white font-bold hover:text-orange-200 transition text-lg">
+                        👤 <?= htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['user_email']) ?>
+                    </a>
+                    <a href="logout.php" class="bg-red-600 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition">
+                        Đăng xuất
+                    </a>
+                </div>
+
+                <a href="cart.php" class="relative group">
+                    <span class="text-3xl group-hover:scale-110 transition inline-block">🛒</span>
+                    <?php
+                    $res = $conn->query("SELECT SUM(ci.quantity) AS total_qty FROM cart c JOIN cart_items ci ON ci.cart_id = c.id WHERE c.session_id = '" . $conn->real_escape_string($cart_session) . "'");
+                    $row = $res ? $res->fetch_assoc() : null;
+                    $count = $row['total_qty'] ?? 0;
+                    $hiddenClass = ($count > 0) ? '' : 'hidden';
+                    echo "<span id='cart-count' class='absolute -top-2 -right-2 bg-white text-orange-600 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md $hiddenClass'>{$count}</span>";
+                    ?>
                 </a>
             </div>
         </div>
@@ -382,18 +406,9 @@ if ($cart_result->num_rows > 0) {
                         </div>
                     </div>
                     
-                    <!-- Terms & Submit -->
+                    <!-- Submit -->
                     <div class="p-6">
-                        <div class="mb-4">
-                            <label class="flex items-start gap-2 cursor-pointer">
-                                <input type="checkbox" required class="mt-1">
-                                <span class="text-sm text-gray-600">
-                                    Tôi đồng ý với <a href="#" class="text-orange-600 hover:underline">điều khoản và điều kiện</a> của VLXD PRO
-                                </span>
-                            </label>
-                        </div>
-                        
-                        <button type="submit" class="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-4 rounded-lg font-bold text-lg hover:shadow-lg transition">
+                        <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white py-4 rounded-lg font-bold text-lg hover:shadow-lg transition">
                             <i class="fas fa-lock"></i> ĐẶT HÀNG NGAY
                         </button>
                         

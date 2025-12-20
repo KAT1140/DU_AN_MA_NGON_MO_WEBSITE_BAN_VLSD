@@ -4,20 +4,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Giỏ hàng - VLXD PRO</title>
+  <title>Giỏ hàng - VLXD KAT</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <!-- Header Navigation -->
-  <div class="bg-white shadow-md sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="index.php" class="text-2xl font-bold text-orange-600">VLXD PRO</a>
-      <h1 class="text-xl font-bold text-gray-800"><i class="fas fa-shopping-cart"></i> Giỏ hàng</h1>
-      <div class="w-20"></div>
+  <header class="bg-gradient-to-r from-orange-500 to-amber-500 text-white sticky top-0 z-50 shadow-xl">
+    <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+      <a href="index.php" class="flex items-center gap-4 hover:opacity-90 transition">
+        <img src="uploads/logo.png" alt="VLXD Logo" class="w-16 h-16 object-cover rounded-full">
+        <h1 class="text-3xl font-black">VLXD KAT</h1>
+      </a>
+      <div class="flex items-center gap-8">
+        <nav class="flex items-center gap-6">
+          <a href="index.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2">
+            <i class="fas fa-home"></i> Trang chủ
+          </a>
+          <a href="products.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2">
+            <i class="fas fa-box"></i> Sản phẩm
+          </a>
+        </nav>
+        
+        <div class="flex items-center gap-3">
+          <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
+            <div class="flex items-center gap-3">
+              <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+                <a href="admin.php" class="bg-yellow-400 text-orange-900 px-4 py-2 rounded-full font-bold hover:bg-yellow-300 transition flex items-center gap-2 shadow-lg text-sm">
+                  <i class="fas fa-user-shield"></i> Quản trị
+                </a>
+              <?php endif; ?>
+              <a href="profile.php" class="text-white font-bold hover:text-orange-200 transition text-lg">
+                👤 <?= htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['user_email']) ?>
+              </a>
+              <a href="logout.php" class="bg-red-600 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition">
+                Đăng xuất
+              </a>
+            </div>
+          <?php else: ?>
+            <a href="login.php" class="bg-white text-orange-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition">
+              Đăng nhập
+            </a>
+            <a href="dangki.php" class="border-2 border-white text-white px-6 py-3 rounded-full font-bold hover:bg-orange-400 transition">
+              Đăng ký
+            </a>
+          <?php endif; ?>
+        </div>
+
+        <a href="cart.php" class="relative group">
+          <span class="text-3xl group-hover:scale-110 transition inline-block">🛒</span>
+          <?php
+          $sid = $conn->real_escape_string($cart_session);
+          $res = $conn->query("SELECT SUM(ci.quantity) AS total_qty FROM cart c JOIN cart_items ci ON ci.cart_id = c.id WHERE c.session_id = '$sid'");
+          $row = $res ? $res->fetch_assoc() : null;
+          $count = $row['total_qty'] ?? 0;
+          $hiddenClass = ($count > 0) ? '' : 'hidden';
+          echo "<span id='cart-count' class='absolute -top-2 -right-2 bg-white text-orange-600 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md $hiddenClass'>{$count}</span>";
+          ?>
+        </a>
+      </div>
     </div>
-  </div>
+  </header>
 
   <div class="max-w-6xl mx-auto px-6 py-8">
     <?php 

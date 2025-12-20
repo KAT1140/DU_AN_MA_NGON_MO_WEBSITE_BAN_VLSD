@@ -106,6 +106,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $users = $conn->query("SELECT * FROM users ORDER BY id DESC");
 $total_users = $users->num_rows;
 $admin_count = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'")->fetch_assoc()['count'];
+
+// Đếm đơn hàng chờ xử lý
+$pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order_status = 'pending'")->fetch_assoc()['count'];
 ?>
 
 <!DOCTYPE html>
@@ -133,6 +136,14 @@ $admin_count = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'a
         </a>
         <a href="admin_products.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm">
            <i class="fas fa-boxes"></i> Sản phẩm
+        </a>
+        <a href="admin_orders.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm relative">
+           <i class="fas fa-shopping-cart"></i> Đơn hàng
+           <?php if ($pending_orders > 0): ?>
+               <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                   <?= $pending_orders ?>
+               </span>
+           <?php endif; ?>
         </a>
       </nav>
     </div>

@@ -47,7 +47,7 @@ header('Content-Type: text/html; charset=utf-8');
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <header class="bg-gradient-to-r from-orange-600 to-orange-500 text-white sticky top-0 z-50 shadow-xl">
+  <header class="bg-gradient-to-r from-orange-500 to-amber-500 text-white sticky top-0 z-50 shadow-xl">
     <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
       <a href="index.php" class="flex items-center gap-4 hover:opacity-90 transition">
         <img src="uploads/logo.png" alt="VLXD Logo" class="w-16 h-16 object-cover rounded-full">
@@ -103,50 +103,121 @@ header('Content-Type: text/html; charset=utf-8');
     </div>
   </header>
 
-  <div class="max-w-7xl mx-auto p-10">
-    <h1 class="text-5xl font-black text-center text-orange-600 mb-10">SẢN PHẨM NỔI BẬT</h1>
+  <!-- Hero Banner -->
+  <div class="bg-gradient-to-r from-orange-400 to-amber-400 text-white py-20">
+    <div class="max-w-7xl mx-auto px-10 text-center">
+      <h1 class="text-6xl font-black mb-4">🏗️ VLXD KAT</h1>
+      <p class="text-2xl mb-8">Vật Liệu Xây Dựng Chất Lượng Cao - Giá Cả Cạnh Tranh</p>
+      <div class="flex justify-center gap-4">
+        <a href="products.php" class="bg-white text-orange-500 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition shadow-xl">
+          <i class="fas fa-shopping-bag"></i> Xem tất cả sản phẩm
+        </a>
+        <a href="#featured" class="bg-orange-500 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-orange-600 transition shadow-xl">
+          <i class="fas fa-star"></i> Sản phẩm nổi bật
+        </a>
+      </div>
+    </div>
+  </div>
 
-    <?php
-    $cats = $conn->query("SELECT * FROM categories");
-    echo "<form method='GET' class='mb-6 flex justify-center'>";
-    echo "<div class='bg-white p-2 rounded-xl shadow-md flex gap-2'>";
-    echo "<select name='cat' class='p-3 rounded-lg outline-none cursor-pointer bg-transparent'>";
-    echo "<option value=''>-- Tất cả danh mục --</option>";
-    while ($c = $cats->fetch_assoc()) {
-        $selected = ($_GET['cat'] ?? '') == $c['id'] ? 'selected' : '';
-        $catName = isset($c['name']) ? $c['name'] : $c['NAME'];
-        echo "<option value='{$c['id']}' $selected>{$catName}</option>";
-    }
-    echo "</select>";
-    echo "<button type='submit' class='px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-bold transition'>";
-    echo "Lọc ngay";
-    echo "</button>";
-    echo "</div>";
-    echo "</form>";
-    ?>
+  <!-- Danh mục nhanh -->
+  <div class="max-w-7xl mx-auto px-10 py-12">
+    <h2 class="text-3xl font-black text-center text-gray-800 mb-8">
+      <i class="fas fa-th-large"></i> DANH MỤC SẢN PHẨM
+    </h2>
+    <div class="grid md:grid-cols-4 gap-6">
+      <?php
+      $cats = $conn->query("SELECT * FROM categories WHERE STATUS=1 ORDER BY NAME");
+      while ($c = $cats->fetch_assoc()) {
+          $catName = isset($c['name']) ? $c['name'] : $c['NAME'];
+          echo "<a href='products.php?category_id={$c['id']}' class='bg-white rounded-xl p-6 text-center shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2'>
+                  <div class='text-5xl mb-4'>📦</div>
+                  <h3 class='font-bold text-lg text-gray-800'>" . htmlspecialchars($catName) . "</h3>
+                </a>";
+      }
+      ?>
+    </div>
+  </div>
+
+  <!-- Hàng mới về -->
+  <div class="bg-blue-50 py-16" id="new-products">
+    <div class="max-w-7xl mx-auto px-10">
+      <h2 class="text-5xl font-black text-center text-blue-600 mb-10">
+        <i class="fas fa-gift"></i> HÀNG MỚI VỀ
+      </h2>
+      <div class="grid md:grid-cols-4 gap-8">
+        <?php
+        // Query lấy sản phẩm mới nhất
+        $sql_new = "SELECT id, NAME, price, sale_price, images 
+                    FROM products 
+                    WHERE STATUS = 'active' 
+                    ORDER BY created_at DESC 
+                    LIMIT 8";
+        
+        $result_new = $conn->query($sql_new);
+
+        if ($result_new && $result_new->num_rows > 0) {
+            while ($p = $result_new->fetch_assoc()) {
+                $images = json_decode($p['images'], true);
+                $image_url = !empty($images) ? $images[0] : 'https://via.placeholder.com/300x300?text=No+Image';
+                $display_price = $p['sale_price'] ?? $p['price'];
+                
+                echo "<div class='bg-white rounded-2xl shadow-2xl p-6 text-center hover:shadow-3xl transition flex flex-col h-full transform hover:-translate-y-2 duration-300'>
+                        <div class='flex-grow'>
+                          <div class='relative group-hover:scale-105 transition duration-300'>
+                              <img src='" . htmlspecialchars($image_url) . "' alt='" . htmlspecialchars($p['NAME']) . "' class='bg-gray-200 h-48 w-full object-cover rounded-xl mb-6'>
+                              <span class='absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1'>
+                                  <i class='fas fa-sparkles'></i> MỚI
+                              </span>
+                          </div>
+                          <h3 class='font-bold text-xl mb-2 line-clamp-2 min-h-[3.5rem]'>" . htmlspecialchars($p['NAME']) . "</h3>
+                          <p class='text-3xl font-black text-blue-600 mb-2'>" . number_format($display_price, 0, ',', '.') . "đ</p>
+                        </div>
+                        
+                        <form action='add_to_cart.php' method='POST' class='mt-auto add-to-cart-form'>
+                          <input type='hidden' name='product_id' value='{$p['id']}'>
+                          <input type='hidden' name='quantity' value='1'>
+                          <button type='submit' class='w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 text-xl shadow-lg transform active:scale-95 transition'>
+                            <i class='fas fa-cart-plus'></i> Thêm vào giỏ
+                          </button>
+                        </form>
+                      </div>";
+            }
+        } else {
+            echo "<div class='col-span-4 text-center py-16'>
+                    <i class='fas fa-box-open text-6xl text-gray-300 mb-4'></i>
+                    <p class='text-gray-500 text-xl'>Chưa có sản phẩm mới.</p>
+                  </div>";
+        }
+        ?>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sản phẩm nổi bật -->
+  <div class="max-w-7xl mx-auto px-10 py-16" id="featured">
+    <h2 class="text-5xl font-black text-center text-orange-500 mb-6">
+      <i class="fas fa-star"></i> SẢN PHẨM NỔI BẬT
+    </h2>
+    <p class="text-center text-gray-600 mb-10 text-lg">Được đánh giá cao và bán chạy nhất</p>
 
     <div class="grid md:grid-cols-4 gap-8">
       <?php
-      $cat_id = $_GET['cat'] ?? '';
+      $cat_id = '';
 
-      // --- LOGIC: Sản phẩm bán chạy nhất ---
+      // --- LOGIC: Sản phẩm đề xuất (Bán nhiều + Đánh giá tốt) ---
       $sql = "SELECT p.id, p.NAME, p.price, p.sale_price, p.images, 
-                     COALESCE(SUM(oi.quantity), 0) as total_sold
+                     COALESCE(SUM(oi.quantity), 0) as total_sold,
+                     COALESCE(AVG(r.rating), 0) as avg_rating,
+                     COALESCE(COUNT(DISTINCT r.id), 0) as review_count
               FROM products p
               LEFT JOIN order_items oi ON p.id = oi.product_id
-              LEFT JOIN orders o ON oi.order_id = o.id
+              LEFT JOIN orders o ON oi.order_id = o.id AND (o.order_status IS NULL OR o.order_status != 'cancelled')
+              LEFT JOIN reviews r ON p.id = r.product_id
               WHERE p.STATUS = 'active'";
 
-      if (!empty($cat_id)) {
-          $cat_id = (int)$cat_id;
-          $sql .= " AND p.category_id = $cat_id";
-      }
-
-      // Chỉ tính đơn hàng chưa hủy (nếu muốn)
-      $sql .= " AND (o.order_status IS NULL OR o.order_status != 'cancelled')";
-
       $sql .= " GROUP BY p.id";
-      $sql .= " ORDER BY total_sold DESC, p.created_at DESC LIMIT 8";
+      // Sắp xếp theo: đánh giá trung bình cao, sau đó số lượng bán nhiều
+      $sql .= " ORDER BY avg_rating DESC, total_sold DESC, p.created_at DESC LIMIT 8";
 
       $result = $conn->query($sql);
 
@@ -155,22 +226,30 @@ header('Content-Type: text/html; charset=utf-8');
               $images = json_decode($p['images'], true);
               $image_url = !empty($images) ? $images[0] : 'https://via.placeholder.com/300x300?text=No+Image';
               $display_price = $p['sale_price'] ?? $p['price'];
+              $avg_rating = round($p['avg_rating'], 1);
+              $review_count = $p['review_count'];
               
               echo "<div class='bg-white rounded-2xl shadow-2xl p-6 text-center hover:shadow-3xl transition flex flex-col h-full transform hover:-translate-y-2 duration-300'>
                       <div class='flex-grow'>
                         <div class='relative group-hover:scale-105 transition duration-300'>
-                            <img src='" . htmlspecialchars($image_url) . "' alt='" . htmlspecialchars($p['NAME']) . "' class='bg-gray-200 h-48 w-full object-cover rounded-xl mb-6'>
-                            " . ($p['total_sold'] > 0 ? "<span class='absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm'>Đã bán: {$p['total_sold']}</span>" : "") . "
-                        </div>
+                            <img src='" . htmlspecialchars($image_url) . "' alt='" . htmlspecialchars($p['NAME']) . "' class='bg-gray-200 h-48 w-full object-cover rounded-xl mb-6'>";
+              
+              if ($avg_rating > 0) {
+                  echo "<span class='absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1'>
+                          <i class='fas fa-star'></i> {$avg_rating} ({$review_count})
+                        </span>";
+              }
+              
+              echo "        </div>
                         <h3 class='font-bold text-xl mb-2 line-clamp-2 min-h-[3.5rem]'>" . htmlspecialchars($p['NAME']) . "</h3>
-                        <p class='text-3xl font-black text-orange-600 mb-2'>" . number_format($display_price, 0, ',', '.') . "đ</p>
+                        <p class='text-3xl font-black text-orange-500 mb-2'>" . number_format($display_price, 0, ',', '.') . "đ</p>
                       </div>
                       
                       <form action='add_to_cart.php' method='POST' class='mt-auto add-to-cart-form'>
                         <input type='hidden' name='product_id' value='{$p['id']}'>
                         <input type='hidden' name='quantity' value='1'>
-                        <button type='submit' class='w-full bg-orange-600 text-white py-4 rounded-xl font-bold hover:bg-orange-700 text-xl shadow-lg transform active:scale-95 transition'>
-                          Thêm vào giỏ
+                        <button type='submit' class='w-full bg-orange-500 text-white py-4 rounded-xl font-bold hover:bg-orange-600 text-xl shadow-lg transform active:scale-95 transition'>
+                          <i class='fas fa-cart-plus'></i> Thêm vào giỏ
                         </button>
                       </form>
                     </div>";
@@ -184,6 +263,36 @@ header('Content-Type: text/html; charset=utf-8');
       ?>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-12 mt-16">
+    <div class="max-w-7xl mx-auto px-10 grid md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="text-2xl font-bold mb-4">VLXD KAT</h3>
+        <p class="text-gray-400">Vật liệu xây dựng chất lượng cao, uy tín hàng đầu Việt Nam.</p>
+      </div>
+      <div>
+        <h4 class="text-xl font-bold mb-4">Liên kết nhanh</h4>
+        <ul class="space-y-2 text-gray-400">
+          <li><a href="products.php" class="hover:text-white transition"><i class="fas fa-angle-right"></i> Sản phẩm</a></li>
+          <li><a href="#featured" class="hover:text-white transition"><i class="fas fa-angle-right"></i> Sản phẩm nổi bật</a></li>
+          <li><a href="#new-products" class="hover:text-white transition"><i class="fas fa-angle-right"></i> Hàng mới về</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xl font-bold mb-4">Liên hệ</h4>
+        <ul class="space-y-2 text-gray-400">
+          <li><i class="fas fa-phone"></i> Hotline: 1900 xxxx</li>
+          <li><i class="fas fa-envelope"></i> Email: contact@vlxdkat.vn</li>
+          <li><i class="fas fa-map-marker-alt"></i> Địa chỉ: Hà Nội, Việt Nam</li>
+        </ul>
+      </div>
+    </div>
+    <div class="text-center text-gray-500 mt-8 pt-8 border-t border-gray-700">
+      <p>&copy; 2025 VLXD KAT. All rights reserved.</p>
+    </div>
+  </footer>
+
 <script src="assets/js/main.js"></script>
 </body>
 </html>

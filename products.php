@@ -40,39 +40,60 @@ header('Content-Type: text/html; charset=utf-8');
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <nav class="sticky top-0 z-40 bg-white shadow-md">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-      <a href="index.php" class="text-2xl font-bold text-blue-600 flex items-center gap-2">
-        <img src="uploads/logo.png" alt="VLXD Logo" class="w-10 h-10 object-cover rounded-full">
-        VLXD KAT
+  <header class="bg-gradient-to-r from-orange-500 to-amber-500 text-white sticky top-0 z-50 shadow-xl">
+    <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+      <a href="index.php" class="flex items-center gap-4 hover:opacity-90 transition">
+        <img src="uploads/logo.png" alt="VLXD Logo" class="w-16 h-16 object-cover rounded-full">
+        <h1 class="text-3xl font-black">VLXD KAT</h1>
       </a>
-      <div class="flex items-center gap-6">
-        <a href="index.php" class="text-gray-700 hover:text-blue-600"><i class="fas fa-home"></i> Trang chủ</a>
-        <a href="products.php" class="text-blue-600 font-semibold"><i class="fas fa-box"></i> Sản phẩm</a>
+      <div class="flex items-center gap-8">
+        <nav class="flex items-center gap-6">
+          <a href="index.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2">
+            <i class="fas fa-home"></i> Trang chủ
+          </a>
+          <a href="products.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2 underline">
+            <i class="fas fa-box"></i> Sản phẩm
+          </a>
+        </nav>
         
-        <a href="cart.php" class="text-gray-700 hover:text-blue-600 relative group">
-          <i class="fas fa-shopping-cart text-2xl"></i>
+        <div class="flex items-center gap-3">
+          <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
+            <div class="flex items-center gap-3">
+              <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+                <a href="admin.php" class="bg-yellow-400 text-orange-900 px-4 py-2 rounded-full font-bold hover:bg-yellow-300 transition flex items-center gap-2 shadow-lg text-sm">
+                  <i class="fas fa-user-shield"></i> Quản trị
+                </a>
+              <?php endif; ?>
+              <a href="profile.php" class="text-white font-bold hover:text-orange-200 transition text-lg">
+                👤 <?= htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['user_email']) ?>
+              </a>
+              <a href="logout.php" class="bg-red-600 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition">
+                Đăng xuất
+              </a>
+            </div>
+          <?php else: ?>
+            <a href="login.php" class="bg-white text-orange-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition">
+              Đăng nhập
+            </a>
+            <a href="dangki.php" class="border-2 border-white text-white px-6 py-3 rounded-full font-bold hover:bg-orange-400 transition">
+              Đăng ký
+            </a>
+          <?php endif; ?>
+        </div>
+
+        <a href="cart.php" class="relative group">
+          <span class="text-3xl group-hover:scale-110 transition inline-block">🛒</span>
           <?php
-          // Đảm bảo lấy đúng session id
           $sid = $conn->real_escape_string($_SESSION['cart_id'] ?? session_id());
           $res = $conn->query("SELECT SUM(ci.quantity) AS total_qty FROM cart c JOIN cart_items ci ON ci.cart_id = c.id WHERE c.session_id = '$sid'");
           $count = ($res && $row = $res->fetch_assoc()) ? ($row['total_qty'] ?? 0) : 0;
           $hiddenClass = ($count > 0) ? '' : 'hidden';
+          echo "<span id='cart-count' class='absolute -top-2 -right-2 bg-white text-orange-600 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md $hiddenClass'>{$count}</span>";
           ?>
-          <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold <?= $hiddenClass ?>">
-            <?= $count ?>
-          </span>
         </a>
-
-        <?php if (isset($_SESSION['user_id'])): ?>
-          <a href="profile.php" class="text-gray-700 hover:text-blue-600"><i class="fas fa-user"></i> Tài khoản</a>
-          <a href="logout.php" class="text-gray-700 hover:text-red-600"><i class="fas fa-sign-out-alt"></i></a>
-        <?php else: ?>
-          <a href="login.php" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">Đăng nhập</a>
-        <?php endif; ?>
       </div>
     </div>
-  </nav>
+  </header>
 
  <div class="max-w-7xl mx-auto px-4 py-8">
     <div class="mb-8">
@@ -129,7 +150,7 @@ header('Content-Type: text/html; charset=utf-8');
 
        <div class="mb-6 flex justify-between items-center">
           <h2 class="text-2xl font-bold text-gray-800"><?= $title ?></h2>
-          <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm font-semibold">
+          <span class="bg-orange-50 text-orange-600 px-3 py-1 rounded-lg text-sm font-semibold">
             <i class="fas fa-cube"></i> <?= $total_products ?> sản phẩm
           </span>
         </div>
@@ -158,7 +179,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <div class="p-4 flex-grow">
                   <h3 class="font-bold text-gray-800 mb-2 line-clamp-2"><?= htmlspecialchars($product['NAME']) ?></h3>
                   <div class="flex items-center gap-2 mb-3">
-                    <span class="text-xl font-bold text-red-600"><?= number_format($price, 0, ',', '.') ?>đ</span>
+                    <span class="text-xl font-bold text-orange-500"><?= number_format($price, 0, ',', '.') ?>đ</span>
                     <?php if($product['sale_price'] > 0 && $product['sale_price'] < $product['price']): ?>
                         <span class="text-sm text-gray-400 line-through"><?= number_format($product['price'], 0, ',', '.') ?>đ</span>
                     <?php endif; ?>
@@ -169,11 +190,11 @@ header('Content-Type: text/html; charset=utf-8');
                    <form action="add_to_cart.php" method="POST" class="flex-1 add-to-cart-form">
                         <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                         <input type="hidden" name="quantity" value="1">
-                        <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                        <button type="submit" class="w-full bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition flex items-center justify-center gap-2">
                           <i class="fas fa-shopping-cart"></i> Thêm
                         </button>
                    </form>
-                   <a href="#" class="border border-blue-600 text-blue-600 px-4 py-2 rounded hover:bg-blue-50 transition flex items-center gap-2">
+                   <a href="#" class="border border-orange-500 text-orange-500 px-4 py-2 rounded hover:bg-orange-50 transition flex items-center gap-2">
                       <i class="fas fa-eye"></i> Xem
                    </a>
                 </div>
