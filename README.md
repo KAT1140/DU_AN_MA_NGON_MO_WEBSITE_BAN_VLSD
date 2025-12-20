@@ -1,6 +1,6 @@
 # 🏢 VLXD KAT - Website Bán Vật Liệu Xây Dựng
 
-Website thương mại điện tử chuyên cung cấp vật liệu xây dựng (Xi măng, Gạch, Thép, Sơn) được xây dựng với PHP, MySQL, Tailwind CSS và Font Awesome.
+Website thương mại điện tử chuyên cung cấp vật liệu xây dựng được xây dựng với PHP, MySQL, Tailwind CSS và Font Awesome.
 
 ![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-5.7+-4479A1?style=for-the-badge&logo=mysql&logoColor=white)

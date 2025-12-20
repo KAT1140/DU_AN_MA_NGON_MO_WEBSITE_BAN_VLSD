@@ -98,6 +98,7 @@ if (!isset($_SESSION['tables_created'])) {
         customer_email VARCHAR(255),
         customer_phone VARCHAR(20),
         customer_address TEXT,
+        province VARCHAR(100),
         shipping_address TEXT,
         note TEXT,
         subtotal DECIMAL(10, 2) DEFAULT 0,
@@ -176,6 +177,21 @@ if (!empty($DEV_ADMIN_EMAIL)) {
         $conn->query("INSERT INTO users (email, full_name, role, created_at) VALUES ('$emailEsc', 'Dev Admin', 'admin', NOW())");
     }
 }
+
+// Create saved_addresses table for storing delivery addresses
+$conn->query("CREATE TABLE IF NOT EXISTS saved_addresses (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    address_name VARCHAR(100) DEFAULT 'Địa chỉ giao hàng',
+    recipient_name VARCHAR(255) NOT NULL,
+    recipient_phone VARCHAR(20) NOT NULL,
+    province VARCHAR(100) NOT NULL,
+    address TEXT NOT NULL,
+    is_default TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
 if(!isset($_SESSION['cart_id'])) {
     $_SESSION['cart_id'] = session_id();

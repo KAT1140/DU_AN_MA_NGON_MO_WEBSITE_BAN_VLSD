@@ -74,15 +74,15 @@ try {
     // Insert vào bảng orders
     $order_sql = "INSERT INTO orders (
                     order_code, user_id, customer_name, customer_email, customer_phone, 
-                    customer_address, shipping_address, note, subtotal, shipping_fee, 
+                    customer_address, province, shipping_address, note, subtotal, shipping_fee, 
                     total_amount, payment_method, payment_status, order_status
-                  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending')";
+                  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending')";
     
     $order_stmt = $conn->prepare($order_sql);
     $shipping_address = $customer_address . ', ' . $province;
-    $order_stmt->bind_param('sissssssddds', 
+    $order_stmt->bind_param('sisssssssddss', 
         $order_code, $user_id, $customer_name, $customer_email, $customer_phone,
-        $customer_address, $shipping_address, $note, $subtotal, $shipping_fee,
+        $customer_address, $province, $shipping_address, $note, $subtotal, $shipping_fee,
         $total, $payment_method
     );
     

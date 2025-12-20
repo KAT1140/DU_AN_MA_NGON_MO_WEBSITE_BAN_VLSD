@@ -19,6 +19,9 @@ $user_result = $user_stmt->get_result();
 $user = $user_result->fetch_assoc();
 $user_stmt->close();
 
+// Lấy địa chỉ đã lưu
+$saved_addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_id ORDER BY is_default DESC, created_at DESC");
+
 // Lấy giỏ hàng
 $sql = "SELECT ci.id, ci.quantity, ci.price, p.id as product_id, p.NAME as product_name, p.images 
         FROM cart c
@@ -129,9 +132,28 @@ if ($cart_result->num_rows > 0) {
             <div class="lg:col-span-2 space-y-6">
                 <!-- Shipping Information -->
                 <div class="bg-white rounded-xl shadow-md p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-truck text-orange-600"></i> Thông tin giao hàng
-                    </h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-truck text-orange-600"></i> Thông tin giao hàng
+                        </h2>
+                        <a href="addresses.php" class="text-orange-600 hover:text-orange-700 text-sm">
+                            <i class="fas fa-map-marker-alt"></i> Quản lý địa chỉ
+                        </a>
+                    </div>
+                    
+                    <?php if ($saved_addresses->num_rows > 0): ?>
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Chọn địa chỉ có sẵn</label>
+                            <select id="savedAddressSelect" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                <option value="">-- Nhập địa chỉ mới --</option>
+                                <?php while ($addr = $saved_addresses->fetch_assoc()): ?>
+                                    <option value='<?= json_encode($addr) ?>'>
+                                        <?= htmlspecialchars($addr['address_name']) ?> - <?= htmlspecialchars($addr['recipient_name']) ?> - <?= htmlspecialchars($addr['recipient_phone']) ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
+                    <?php endif; ?>
                     
                     <form id="checkout-form" method="POST" action="process_order.php">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -390,6 +412,23 @@ if ($cart_result->num_rows > 0) {
     </div>
 
     <script>
+        // Load saved address
+        document.getElementById('savedAddressSelect')?.addEventListener('change', function() {
+            if (this.value) {
+                const addr = JSON.parse(this.value);
+                document.querySelector('[name="customer_name"]').value = addr.recipient_name;
+                document.querySelector('[name="customer_phone"]').value = addr.recipient_phone;
+                document.querySelector('[name="province"]').value = addr.province;
+                document.querySelector('[name="customer_address"]').value = addr.address;
+            } else {
+                // Clear fields
+                document.querySelector('[name="customer_name"]').value = '';
+                document.querySelector('[name="customer_phone"]').value = '';
+                document.querySelector('[name="province"]').value = '';
+                document.querySelector('[name="customer_address"]').value = '';
+            }
+        });
+
         // Payment Method Selection
         document.querySelectorAll('.payment-method').forEach(method => {
             method.addEventListener('click', function() {
