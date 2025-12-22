@@ -119,6 +119,13 @@ try {
     
     $order_item_stmt->close();
     
+    // Cập nhật thông tin người dùng (lưu địa chỉ, số điện thoại)
+    $update_user_sql = "UPDATE users SET full_name = ?, phone = ?, address = ? WHERE id = ?";
+    $update_user_stmt = $conn->prepare($update_user_sql);
+    $update_user_stmt->bind_param('sssi', $customer_name, $customer_phone, $shipping_address, $user_id);
+    $update_user_stmt->execute();
+    $update_user_stmt->close();
+    
     // Xóa giỏ hàng
     $delete_cart_sql = "DELETE c FROM cart c 
                         LEFT JOIN cart_items ci ON ci.cart_id = c.id 
