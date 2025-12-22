@@ -18,6 +18,12 @@ if ($conn->connect_error) die("Kết nối thất bại!");
 // Set charset to UTF-8
 $conn->set_charset("utf8mb4");
 
+// Ping để đảm bảo kết nối còn sống
+if (!$conn->ping()) {
+    $conn = new mysqli("localhost", "root", "", "vlxd_store1");
+    $conn->set_charset("utf8mb4");
+}
+
 // Auto create tables if not exist
 if (!isset($_SESSION['tables_created'])) {
     // Only create tables if they don't exist
@@ -145,23 +151,28 @@ if (!isset($_SESSION['tables_created'])) {
     }
 }
 
-// Ensure `role` column exists on users table (for role-based access)
-if ($conn->query("SELECT 1 FROM users LIMIT 1") !== false) {
-    $colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'role'");
-    if ($colCheck && $colCheck->num_rows === 0) {
-        $conn->query("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'user'");
-    }
-    
-    // Ensure `google_id` column exists (for Google OAuth)
-    $colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'google_id'");
-    if ($colCheck && $colCheck->num_rows === 0) {
-        $conn->query("ALTER TABLE users ADD COLUMN google_id VARCHAR(255)");
-    }
-    
-    // Ensure `avatar_url` column exists
-    $colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'avatar_url'");
-    if ($colCheck && $colCheck->num_rows === 0) {
-        $conn->query("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)");
+// Cache column checks in session to avoid repeated queries
+if (!isset($_SESSION['columns_checked'])) {
+    // Ensure `role` column exists on users table (for role-based access)
+    if ($conn->query("SELECT 1 FROM users LIMIT 1") !== false) {
+        $colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'role'");
+        if ($colCheck && $colCheck->num_rows === 0) {
+            $conn->query("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'user'");
+        }
+        
+        // Ensure `google_id` column exists (for Google OAuth)
+        $colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'google_id'");
+        if ($colCheck && $colCheck->num_rows === 0) {
+            $conn->query("ALTER TABLE users ADD COLUMN google_id VARCHAR(255)");
+        }
+        
+        // Ensure `avatar_url` column exists
+        $colCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'avatar_url'");
+        if ($colCheck && $colCheck->num_rows === 0) {
+            $conn->query("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)");
+        }
+        
+        $_SESSION['columns_checked'] = true;
     }
 }
 
