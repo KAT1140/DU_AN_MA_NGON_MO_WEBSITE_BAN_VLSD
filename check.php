@@ -12,9 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
     
-    // Kiểm tra user trong database
-    $sql = "SELECT id, email, PASSWORD, full_name, role FROM users WHERE email = '$email'";
-    $result = $conn->query($sql);
+    // Kiểm tra user trong database - Dùng prepared statement để tránh SQL injection
+    $sql = "SELECT id, email, PASSWORD, full_name, role FROM users WHERE email = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
     
     if ($result->num_rows == 1) {
         $user = $result->fetch_assoc();
