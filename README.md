@@ -58,35 +58,43 @@ cd DU_AN_MA_NGON_MO_WEBSITE_BAN_VLSD
 - `index.php` - Trang chủ, hiển thị sản phẩm nổi bật
 - `products.php` - Trang danh sách sản phẩm với bộ lọc danh mục
 - `cart.php` - Giỏ hàng
-- `checkout.php` - Trang thanh toán
+- `checkout.php` - Trang thanh toán với địa chỉ đã lưu
 - `thanhtoan.php` - Trang xác nhận thanh toán
+- `payment_qr.php` - Trang hiển thị mã QR thanh toán (banking/MoMo)
+- `confirm_payment.php` - Xác nhận đã thanh toán
 - `order_success.php` - Trang thành công sau khi đặt hàng
+- `my_orders.php` - Lịch sử đơn hàng
+- `addresses.php` - Quản lý địa chỉ đã lưu
 - `profile.php` - Trang hồ sơ người dùng
 - `login.php` - Trang đăng nhập (email/password + Google OAuth)
-- `dangki.php` - Trang đăng ký tài khoản
+- `dangki.php` - Trang đăng ký tài khoản (có nhập tên)
 
 ### Backend Processing
 - `config.php` - Cấu hình database & tự động tạo bảng
-- `check.php` - Xử lý đăng nhập/đăng ký
+- `check.php` - Xử lý đăng nhập với prepared statements
 - `callback.php` - Callback Google OAuth
 - `logout.php` - Xử lý đăng xuất
 - `add_to_cart.php` - Thêm sản phẩm vào giỏ
 - `update_cart.php` - Cập nhật số lượng trong giỏ
 - `remove_from_cart.php` - Xóa sản phẩm khỏi giỏ
-- `process_order.php` - Xử lý đơn hàng
+- `process_order.php` - Xử lý đơn hàng & routing thanh toán
+- `get_order_details.php` - API lấy chi tiết đơn hàng
+- `get_order_items_for_review.php` - Lấy sản phẩm để đánh giá
+- `submit_review.php` - Xử lý đánh giá sản phẩm
 
 ### Admin Pages
 - `admin.php` - Quản lý người dùng (chỉ admin)
 - `admin_products.php` - Quản lý sản phẩm
+- `admin_orders.php` - Quản lý đơn hàng
 - `add_product.php` - Thêm sản phẩm mới
 - `add_category.php` - Thêm danh mục
 
 ### Database & Assets
-- `vlxd_storemoi.sql` - File SQL backup database
-- `fix_categories.sql` - Script fix category_id
+- `vlxd_store1.sql` - File SQL backup database đầy đủ
+- `setup_saved_addresses.php` - Script tạo bảng địa chỉ đã lưu
 - `uploads/` - Thư mục chứa hình ảnh sản phẩm
 - `assets/css/` - File CSS tùy chỉnh
-- `assets/js/` - JavaScript files
+- `assets/js/` - JavaScript files (cart-page.js, main.js)
 
 ## 📁 Cấu trúc thư mục
 
@@ -96,9 +104,13 @@ vlxd/
 ├── products.php               # Danh sách sản phẩm
 ├── cart.php                   # Giỏ hàng
 ├── checkout.php               # Thanh toán
-├── thanhtoan.php              # Xác nhận thanh toán
+├── payment_qr.php             # Thanh toán QR code
+├── confirm_payment.php        # Xác nhận thanh toán
+├── thanhtoan.php              # Xác nhận thanh toán (legacy)
 ├── order_success.php          # Thành công
 ├── process_order.php          # Xử lý đơn hàng
+├── my_orders.php              # Lịch sử đơn hàng
+├── addresses.php              # Quản lý địa chỉ
 ├── login.php                  # Đăng nhập
 ├── dangki.php                 # Đăng ký
 ├── check.php                  # Xử lý auth
@@ -107,14 +119,18 @@ vlxd/
 ├── profile.php                # Hồ sơ
 ├── admin.php                  # Quản lý users
 ├── admin_products.php         # Quản lý products
+├── admin_orders.php           # Quản lý orders
 ├── add_product.php            # Thêm sản phẩm
 ├── add_category.php           # Thêm danh mục
 ├── add_to_cart.php            # Thêm vào giỏ
 ├── update_cart.php            # Cập nhật giỏ
 ├── remove_from_cart.php       # Xóa khỏi giỏ
+├── get_order_details.php      # API order details
+├── get_order_items_for_review.php  # API review items
+├── submit_review.php          # Xử lý review
 ├── config.php                 # Cấu hình DB
-├── vlxd_storemoi.sql          # Database backup
-├── fix_categories.sql         # Script fix data
+├── vlxd_store1.sql            # Database backup
+├── setup_saved_addresses.php  # Script setup địa chỉ
 ├── assets/
 │   ├── css/
 │   │   └── style.css
@@ -132,26 +148,31 @@ vlxd/
 
 ### Khách hàng
 - 🏠 Trang chủ với sản phẩm nổi bật
-- 🛍️ Duyệt sản phẩm theo danh mục (Xi măng, Gạch, Thép, Sơn)
+- 🛍️ Duyệt sản phẩm theo danh mục 
 - 🔍 Lọc sản phẩm theo category
 - 🛒 Giỏ hàng với AJAX (không reload trang)
-- 💳 Thanh toán đơn hàng
-- 📦 Lịch sử đơn hàng
+- � Lưu và chọn địa chỉ giao hàng
+- 💳 Thanh toán: COD, Banking, MoMo
+- 📱 Thanh toán QR code (VietQR, MoMo)
+- 📦 Lịch sử đơn hàng với trạng thái real-time
+- ⭐ Đánh giá sản phẩm sau khi nhận hàng
 - 👤 Quản lý hồ sơ cá nhân
 
 ### Xác thực & Bảo mật
-- 🔐 Đăng nhập email/password (bcrypt hash)
+- 🔐 Đăng nhập email/password (bcrypt hash - VARCHAR(255))
 - 🌐 Đăng nhập Google OAuth 2.0
 - 🔒 Session-based authentication
 - 👥 Phân quyền User/Admin
 - 🛡️ SQL injection prevention (prepared statements)
 - 🚪 Auto-redirect khi chưa đăng nhập
+- ✅ Password hashing chuẩn bcrypt ($2y$12$)
 
 ### Quản trị viên (Admin)
 - 👥 Quản lý người dùng (Active/Inactive)
 - 📦 Quản lý sản phẩm (CRUD operations)
 - 🏷️ Quản lý danh mục
 - 🖼️ Upload hình ảnh sản phẩm
+- 📋 Quản lý đơn hàng & cập nhật trạng thái
 - 📊 Xem thống kê tổng quan
 
 ### Giao diện
@@ -161,14 +182,17 @@ vlxd/
 - 🌈 Modern UI/UX
 - 🔔 Toast notifications
 - 💫 Smooth animations
+- 🎯 Intuitive navigation
 
 ## 📝 Ghi chú
 
 - Giỏ hàng sử dụng Session để lưu trữ dữ liệu tạm thời
-- Database: `vlxd_store` (tự động tạo bảng khi chạy lần đầu)
-- Chạy trên localhost với XAMPP
-- Giao diện sử dụng Tailwind CSS
+- Database: `vlxd_store1` (auto-create tables on first run)
+- Password field: **VARCHAR(255)** (critical for bcrypt hashes)
+- Chạy trên localhost với XAMPP hoặc PHP built-in server
+- Giao diện sử dụng Tailwind CSS 3.x (CDN)
 - Session được kiểm tra để tránh lỗi "session already started"
+- Payment QR sử dụng VietQR API và Google Charts API
 
 ## �️ Cấu trúc Database
 
@@ -195,11 +219,20 @@ Database tự động được tạo khi chạy lần đầu (xem `config.php`)
   - id, cart_id, product_id, quantity, price
   
 - **orders** - Đơn hàng
-  - id, user_id, order_code, total_amount, STATUS, payment_method
+  - id, user_id, order_code, total_amount, STATUS, payment_method, payment_status
+  - order_status (pending, processing, shipping, delivered, cancelled, awaiting_payment)
   - customer_name, customer_phone, customer_email, shipping_address
   
 - **order_items** - Chi tiết đơn hàng
   - id, order_id, product_id, quantity, price, subtotal
+
+- **saved_addresses** - Địa chỉ đã lưu
+  - id, user_id, recipient_name, phone, province, district, ward, address_detail
+  - is_default, created_at, updated_at
+  
+- **reviews** - Đánh giá sản phẩm
+  - id, user_id, product_id, order_id, rating (1-5), comment
+  - created_at
   
 - **suppliers** - Nhà cung cấp
   - id, NAME, contact_person, phone, email, address, STATUS
@@ -268,10 +301,13 @@ $DEV_ADMIN_EMAIL = "your-admin@gmail.com";
 - Prepared statements để chống SQL injection
 
 ### Security Features
-- Password hashing với `password_hash()` (bcrypt)
+- Password hashing với `password_hash()` (bcrypt, $2y$12$)
+- **Critical:** PASSWORD column must be VARCHAR(255) for bcrypt
 - Session-based authentication
 - Input validation & sanitization
 - XSS prevention với `htmlspecialchars()`
+- Prepared statements prevent SQL injection
+- PHP 8.4 compatible (null coalescing operators)
 
 ### Performance
 - Lazy loading images
@@ -328,7 +364,26 @@ if (session_status() === PHP_SESSION_NONE) {
 - Verify username/password trong `config.php`
 - Đảm bảo database `vlxd_store1` đã được tạo
 
+### Lỗi đăng nhập sau khi đăng ký
+- **Root Cause:** PASSWORD column VARCHAR(50) truncates bcrypt hashes (60 chars)
+- **Solution:** 
+  ```sql
+  ALTER TABLE users MODIFY COLUMN PASSWORD VARCHAR(255);
+  ```
+- Users with old passwords need to re-register
+
 ## 🔄 Changelog
+
+### v2.1.0 (2025-12-23)
+- ✅ Thêm thanh toán QR code (Banking & MoMo)
+- ✅ Hệ thống lưu địa chỉ giao hàng
+- ✅ Chọn địa chỉ đã lưu khi checkout
+- ✅ Hệ thống đánh giá sản phẩm
+- ✅ Fix lỗi đăng nhập (PASSWORD VARCHAR(255))
+- ✅ Fix admin panel PHP 8.4 deprecation
+- ✅ Cải thiện checkout flow & validation
+- ✅ Thêm trường fullname vào form đăng ký
+- ✅ API endpoints cho order details & reviews
 
 ### v2.0.0 (2025-12-20)
 - ✅ Fix category_id cho sản phẩm Gạch và Sơn
@@ -370,7 +425,4 @@ Copyright (c) 2025 KAT1140
 - [Tailwind CSS](https://tailwindcss.com/) - CSS Framework
 - [Font Awesome](https://fontawesome.com/) - Icon Library
 - [Google OAuth](https://developers.google.com/identity) - Authentication
-- [XAMPP](https://www.apachefriends.org/) - Development Environment
-
-
-
+- [XAMPP](https://www.apachefriends.org/) - Development Environments
