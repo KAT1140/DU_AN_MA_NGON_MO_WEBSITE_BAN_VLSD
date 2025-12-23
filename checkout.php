@@ -26,6 +26,9 @@ $user_result = $user_stmt->get_result();
 $user = $user_result->fetch_assoc();
 $user_stmt->close();
 
+// Lấy danh sách địa chỉ đã lưu
+$saved_addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_id ORDER BY is_default DESC, created_at DESC");
+
 // Lấy giỏ hàng
 $sql = "SELECT ci.id, ci.quantity, ci.price, p.id as product_id, p.NAME as product_name, p.images 
         FROM cart c
@@ -136,33 +139,79 @@ if ($cart_result->num_rows > 0) {
             <div class="lg:col-span-2 space-y-6">
                 <!-- Shipping Information -->
                 <div class="bg-white rounded-xl shadow-md p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-truck text-orange-600"></i> Thông tin giao hàng
-                    </h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-truck text-orange-600"></i> Thông tin giao hàng
+                        </h2>
+                        <a href="addresses.php" class="text-orange-600 hover:text-orange-700 text-sm font-semibold">
+                            <i class="fas fa-map-marker-alt"></i> Quản lý địa chỉ
+                        </a>
+                    </div>
+                    
+                    <!-- Địa chỉ đã lưu -->
+                    <?php if ($saved_addresses->num_rows > 0): ?>
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">Chọn địa chỉ giao hàng</label>
+                            <div class="space-y-3 max-h-64 overflow-y-auto">
+                                <?php while ($addr = $saved_addresses->fetch_assoc()): ?>
+                                    <div class="border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-orange-500 transition saved-address-item <?= $addr['is_default'] ? 'border-orange-500 bg-orange-50' : '' ?>"
+                                         data-name="<?= htmlspecialchars($addr['recipient_name']) ?>"
+                                         data-phone="<?= htmlspecialchars($addr['recipient_phone']) ?>"
+                                         data-province="<?= htmlspecialchars($addr['province']) ?>"
+                                         data-address="<?= htmlspecialchars($addr['address']) ?>"
+                                         onclick="selectSavedAddress(this)">
+                                        <div class="flex items-start gap-3">
+                                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center mt-1 address-radio">
+                                                <div class="w-2.5 h-2.5 rounded-full bg-orange-600 <?= $addr['is_default'] ? '' : 'hidden' ?>"></div>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center gap-2 mb-1">
+                                                    <h3 class="font-bold text-gray-800"><?= htmlspecialchars($addr['address_name'] ?: 'Địa chỉ') ?></h3>
+                                                    <?php if ($addr['is_default']): ?>
+                                                        <span class="text-xs bg-orange-500 text-white px-2 py-0.5 rounded">Mặc định</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <p class="text-sm text-gray-700"><i class="fas fa-user"></i> <?= htmlspecialchars($addr['recipient_name']) ?></p>
+                                                <p class="text-sm text-gray-700"><i class="fas fa-phone"></i> <?= htmlspecialchars($addr['recipient_phone']) ?></p>
+                                                <p class="text-sm text-gray-600"><i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($addr['address']) ?>, <?= htmlspecialchars($addr['province']) ?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endwhile; ?>
+                            </div>
+                            <div class="mt-3 text-center">
+                                <button type="button" onclick="toggleManualInput()" class="text-orange-600 hover:text-orange-700 text-sm font-semibold">
+                                    <i class="fas fa-edit"></i> Hoặc nhập địa chỉ khác
+                                </button>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     
                     <form id="checkout-form" method="POST" action="process_order.php">
+                        <!-- Form nhập thủ công -->
+                        <div id="manual-input-section" class="<?= $saved_addresses->num_rows > 0 ? 'hidden' : '' ?>">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Họ và tên *</label>
-                                <input type="text" name="customer_name" required 
+                                <input type="text" name="customer_name" id="customer_name" required 
                                        value="<?= htmlspecialchars($user['full_name'] ?? '') ?>"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
-                                <input type="email" name="customer_email" required
+                                <input type="email" name="customer_email" id="customer_email" required
                                        value="<?= htmlspecialchars($user['email'] ?? '') ?>"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại *</label>
-                                <input type="tel" name="customer_phone" required
+                                <input type="tel" name="customer_phone" id="customer_phone" required
                                        value="<?= htmlspecialchars($user['phone'] ?? '') ?>"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Tỉnh/Thành phố *</label>
-                                <input type="text" name="province" required list="provinces-list" 
+                                <input type="text" name="province" id="province" required list="provinces-list" 
                                        placeholder="Nhập hoặc chọn tỉnh/thành phố"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                                 <datalist id="provinces-list">
@@ -235,9 +284,11 @@ if ($cart_result->num_rows > 0) {
                         
                         <div class="mt-4">
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ cụ thể *</label>
-                            <textarea name="customer_address" required rows="3"
+                            <textarea name="customer_address" id="customer_address" required rows="3"
                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
                         </div>
+                        </div>
+                        <!-- Kết thúc form nhập thủ công -->
                         
                         <div class="mt-4">
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Ghi chú đơn hàng</label>
@@ -381,13 +432,72 @@ if ($cart_result->num_rows > 0) {
                             <i class="fas fa-arrow-left"></i> Quay lại giỏ hàng
                         </a>
                     </div>
-                    </form>
                 </div>
+                </form>
             </div>
         </div>
     </div>
 
     <script>
+        // Chọn địa chỉ đã lưu
+        function selectSavedAddress(element) {
+            // Bỏ chọn tất cả
+            document.querySelectorAll('.saved-address-item').forEach(item => {
+                item.classList.remove('border-orange-500', 'bg-orange-50');
+                item.querySelector('.address-radio div').classList.add('hidden');
+            });
+            
+            // Chọn item hiện tại
+            element.classList.add('border-orange-500', 'bg-orange-50');
+            element.querySelector('.address-radio div').classList.remove('hidden');
+            
+            // Điền thông tin vào form
+            document.getElementById('customer_name').value = element.getAttribute('data-name');
+            document.getElementById('customer_phone').value = element.getAttribute('data-phone');
+            document.getElementById('province').value = element.getAttribute('data-province');
+            document.getElementById('customer_address').value = element.getAttribute('data-address');
+            
+            // Ẩn form nhập thủ công
+            const manualSection = document.getElementById('manual-input-section');
+            manualSection.classList.add('hidden');
+            
+            // Disable required cho các input khi ẩn
+            manualSection.querySelectorAll('input[required], textarea[required]').forEach(input => {
+                input.removeAttribute('required');
+            });
+        }
+        
+        // Toggle hiển thị form nhập thủ công
+        function toggleManualInput() {
+            const manualSection = document.getElementById('manual-input-section');
+            manualSection.classList.toggle('hidden');
+            
+            if (!manualSection.classList.contains('hidden')) {
+                // Bỏ chọn tất cả địa chỉ đã lưu
+                document.querySelectorAll('.saved-address-item').forEach(item => {
+                    item.classList.remove('border-orange-500', 'bg-orange-50');
+                    item.querySelector('.address-radio div').classList.add('hidden');
+                });
+                
+                // Enable lại required cho các input
+                manualSection.querySelectorAll('input, textarea').forEach(input => {
+                    if (input.id === 'customer_name' || input.id === 'customer_email' || 
+                        input.id === 'customer_phone' || input.id === 'province' || 
+                        input.id === 'customer_address') {
+                        input.setAttribute('required', 'required');
+                    }
+                });
+            }
+        }
+        
+        // Khi load trang, nếu có địa chỉ đã lưu thì auto chọn địa chỉ đầu tiên
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstAddress = document.querySelector('.saved-address-item');
+            if (firstAddress) {
+                selectSavedAddress(firstAddress);
+            }
+        });
+        
         // Payment Method Selection
         document.querySelectorAll('.payment-method').forEach(method => {
             method.addEventListener('click', function() {

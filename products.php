@@ -162,8 +162,13 @@ header('Content-Type: text/html; charset=utf-8');
         <?php else: ?>
          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <?php while ($product = $result->fetch_assoc()): 
-                $images = json_decode($product['images'], true);
-                $image_url = !empty($images) ? $images[0] : 'https://via.placeholder.com/300x300?text=No+Image';
+                // Kiểm tra cột image trước, nếu không có thì dùng images
+                if (!empty($product['image'])) {
+                    $image_url = 'uploads/' . $product['image'];
+                } else {
+                    $images = json_decode($product['images'] ?? '', true);
+                    $image_url = !empty($images) ? $images[0] : 'https://via.placeholder.com/300x300?text=No+Image';
+                }
                 $price = $product['sale_price'] > 0 ? $product['sale_price'] : $product['price'];
             ?>
               <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition overflow-hidden group flex flex-col h-full">

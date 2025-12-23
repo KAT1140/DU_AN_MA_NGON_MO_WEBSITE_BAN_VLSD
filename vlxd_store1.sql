@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th12 23, 2025 lúc 09:27 AM
+-- Thời gian đã tạo: Th12 23, 2025 lúc 10:09 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -136,7 +136,9 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id`, `order_code`, `user_id`, `customer_name`, `customer_email`, `customer_phone`, `customer_address`, `province`, `shipping_address`, `note`, `subtotal`, `shipping_fee`, `tax`, `discount`, `total_amount`, `payment_method`, `payment_status`, `order_status`, `shipping_method`, `tracking_number`, `completed_at`, `cancelled_at`, `created_at`, `updated_at`) VALUES
-(1, 'VLXD20251223694A386BE0B76', 1, 'Nam Vo', 'namvokat@gmail.com', '0379648264', 'trà vinh', 'Trà Vinh', 'trà vinh, Trà Vinh', '', 540000.00, 30000.00, 0.00, 0.00, 570000.00, 'cod', 'paid', 'delivered', NULL, NULL, '2025-12-23 06:37:03', NULL, '2025-12-23 06:36:27', '2025-12-23 06:37:03');
+(1, 'VLXD20251223694A386BE0B76', 1, 'Nam Vo', 'namvokat@gmail.com', '0379648264', 'trà vinh', 'Trà Vinh', 'trà vinh, Trà Vinh', '', 540000.00, 30000.00, 0.00, 0.00, 570000.00, 'cod', 'paid', 'delivered', NULL, NULL, '2025-12-23 06:37:03', NULL, '2025-12-23 06:36:27', '2025-12-23 06:37:03'),
+(4, 'VLXD20251223694A5680B554C', 1, 'Nam Vo', 'namvokat@gmail.com', '0379648264', 'trà vinh, Trà Vinh, An Giang', 'An Giang', 'trà vinh, Trà Vinh, An Giang, An Giang', '', 30000.00, 30000.00, 0.00, 0.00, 60000.00, 'banking', 'pending', '', NULL, NULL, NULL, NULL, '2025-12-23 08:44:48', '2025-12-23 08:44:48'),
+(5, 'VLXD20251223694A585013006', 1, 'nam', 'namvokat@gmail.com', '0379648264', 'Trà Vinh', 'Việt Nam', 'Trà Vinh, Việt Nam', '', 125000.00, 30000.00, 0.00, 0.00, 155000.00, 'banking', 'pending', '', NULL, NULL, NULL, NULL, '2025-12-23 08:52:32', '2025-12-23 08:52:32');
 
 -- --------------------------------------------------------
 
@@ -162,7 +164,10 @@ CREATE TABLE `order_items` (
 INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `product_name`, `product_price`, `quantity`, `total_price`, `created_at`) VALUES
 (1, 1, 15, 'Thép Ống Phi 27 – TO27', 30000.00, 4, 120000.00, '2025-12-23 06:36:27'),
 (2, 1, 14, 'Thép Hộp Vuông 50x50 – TH50', 95000.00, 4, 380000.00, '2025-12-23 06:36:27'),
-(3, 1, 16, 'Thép V – 10mm – TV10', 20000.00, 2, 40000.00, '2025-12-23 06:36:27');
+(3, 1, 16, 'Thép V – 10mm – TV10', 20000.00, 2, 40000.00, '2025-12-23 06:36:27'),
+(8, 4, 15, 'Thép Ống Phi 27 – TO27', 30000.00, 1, 30000.00, '2025-12-23 08:44:48'),
+(9, 5, 14, 'Thép Hộp Vuông 50x50 – TH50', 95000.00, 1, 95000.00, '2025-12-23 08:52:32'),
+(10, 5, 15, 'Thép Ống Phi 27 – TO27', 30000.00, 1, 30000.00, '2025-12-23 08:52:32');
 
 -- --------------------------------------------------------
 
@@ -232,10 +237,10 @@ INSERT INTO `products` (`id`, `NAME`, `description`, `short_description`, `sku`,
 (9, 'Sơn Ngoại Thất Chống Thấm – Xanh', 'Sơn ngoại thất chống thấm, chịu thời tiết tốt, màu xanh mát mắt.', 'Sơn ngoại thất chống thấm xanh', 'SON_NT_XANH', 2, 2, 150000.00, 135000.00, 100000.00, 300, 10, 800, 5.00, 'Lít', NULL, '[\"son_ngoai_that_xanh.jpg\"]', '{\"màu_sắc\":\"Xanh\",\"loại\":\"Ngoại thất\",\"dung_tích\":\"5L\"}', 'active', 0, 0, '2025-11-25 08:51:39', '2025-11-25 08:51:39', 0),
 (10, 'Sơn Nội Thất Cao Cấp – Kem', 'Sơn nội thất màu kem, mịn màng, dễ lau chùi và an toàn cho sức khỏe.', 'Sơn nội thất kem cao cấp', 'SON_NT_KEM', 2, 1, 120000.00, 110000.00, 80000.00, 400, 10, 900, 5.00, 'Lít', NULL, '[\"son_noi_that_kem.jpg\"]', '{\"màu_sắc\":\"Kem\",\"loại\":\"Nội thất\",\"dung_tích\":\"5L\"}', 'active', 0, 0, '2025-11-25 08:51:53', '2025-11-25 08:51:53', 0),
 (11, 'Sơn Ngoại Thất Chống Nắng – Vàng', 'Sơn ngoại thất màu vàng, chống tia UV, bền màu và chịu thời tiết tốt.', 'Sơn ngoại thất chống nắng vàng', 'SON_NT_VANG', 2, 2, 150000.00, 140000.00, 100000.00, 350, 10, 850, 5.00, 'Lít', NULL, '[\"son_ngoai_that_vang.jpg\"]', '{\"màu_sắc\":\"Vàng\",\"loại\":\"Ngoại thất\",\"dung_tích\":\"5L\"}', 'active', 0, 0, '2025-11-25 08:52:07', '2025-11-25 08:52:07', 0),
-(12, 'Sơn Nội Thất Chống Ẩm – Xám', 'Sơn nội thất chống ẩm, màu xám hiện đại, bảo vệ tường khỏi nấm mốc.', 'Sơn nội thất chống ẩm xám', 'SON_NT_XAM', 4, 1, 125000.00, 115000.00, 85000.00, 450, 10, 950, 5.00, 'Lít', 'product_1766471845_694a38a569afe.png', '[\"son_noi_that_xam.jpg\"]', '{\"màu_sắc\":\"Xám\",\"loại\":\"Nội thất\",\"dung_tích\":\"5L\"}', 'active', 0, 0, '2025-11-25 08:52:22', '2025-12-23 06:37:54', 0),
+(12, 'Sơn Nội Thất Chống Ẩm – Xám', 'Sơn nội thất chống ẩm, màu xám hiện đại, bảo vệ tường khỏi nấm mốc.', 'Sơn nội thất chống ẩm xám', 'SON_NT_XAM', 4, 1, 125000.00, 115000.00, 85000.00, 449, 10, 950, 5.00, 'Lít', 'product_1766471845_694a38a569afe.png', '[\"son_noi_that_xam.jpg\"]', '{\"màu_sắc\":\"Xám\",\"loại\":\"Nội thất\",\"dung_tích\":\"5L\"}', 'active', 0, 0, '2025-11-25 08:52:22', '2025-12-23 08:39:18', 0),
 (13, 'Thép Cây Phi 10 – CT10', 'Thép cây Phi 10 chất lượng cao, dùng cho xây dựng, chịu lực tốt.', 'Thép cây phi 10 CT10', 'THEP_CT10', 3, 1, 12000.00, 11000.00, 9000.00, 1000, 10, 5000, 0.80, 'Cây', NULL, '[\"thep_ct10.jpg\"]', '{\"đường_kinh\":\"10mm\",\"loại\":\"Thép cây\",\"xuất_xứ\":\"Việt Nam\"}', 'active', 0, 0, '2025-11-25 08:53:14', '2025-11-25 08:53:14', 0),
-(14, 'Thép Hộp Vuông 50x50 – TH50', 'Thép hộp vuông 50x50, dày 2mm, dùng làm khung sườn kết cấu chịu lực.', 'Thép hộp vuông 50x50 dày 2mm', 'THEP_TH50', 3, 2, 95000.00, 90000.00, 80000.00, 495, 10, 2000, 5.00, 'Cây', NULL, '[\"thep_hop_50x50.jpg\"]', '{\"kích_thước\":\"50x50mm\",\"dày\":\"2mm\",\"loại\":\"Thép hộp\",\"xuất_xứ\":\"Việt Nam\"}', 'active', 0, 0, '2025-11-25 08:53:27', '2025-12-23 06:43:46', 0),
-(15, 'Thép Ống Phi 27 – TO27', 'Thép ống phi 27 dày 1.5mm, dùng cho hệ thống lan can và kết cấu nhẹ.', 'Thép ống phi 27 TO27', 'THEP_TO27', 3, 1, 30000.00, 28000.00, 25000.00, 794, 10, 3000, 1.50, 'Cây', NULL, '[\"thep_ong_phi27.jpg\"]', '{\"đường_kinh\":\"27mm\",\"dày\":\"1.5mm\",\"loại\":\"Thép ống\",\"xuất_xứ\":\"Việt Nam\"}', 'active', 0, 0, '2025-11-25 08:53:39', '2025-12-23 06:43:46', 0),
+(14, 'Thép Hộp Vuông 50x50 – TH50', 'Thép hộp vuông 50x50, dày 2mm, dùng làm khung sườn kết cấu chịu lực.', 'Thép hộp vuông 50x50 dày 2mm', 'THEP_TH50', 3, 2, 95000.00, 90000.00, 80000.00, 494, 10, 2000, 5.00, 'Cây', NULL, '[\"thep_hop_50x50.jpg\"]', '{\"kích_thước\":\"50x50mm\",\"dày\":\"2mm\",\"loại\":\"Thép hộp\",\"xuất_xứ\":\"Việt Nam\"}', 'active', 0, 0, '2025-11-25 08:53:27', '2025-12-23 08:52:32', 0),
+(15, 'Thép Ống Phi 27 – TO27', 'Thép ống phi 27 dày 1.5mm, dùng cho hệ thống lan can và kết cấu nhẹ.', 'Thép ống phi 27 TO27', 'THEP_TO27', 3, 1, 30000.00, 28000.00, 25000.00, 792, 10, 3000, 1.50, 'Cây', NULL, '[\"thep_ong_phi27.jpg\"]', '{\"đường_kinh\":\"27mm\",\"dày\":\"1.5mm\",\"loại\":\"Thép ống\",\"xuất_xứ\":\"Việt Nam\"}', 'active', 0, 0, '2025-11-25 08:53:39', '2025-12-23 08:52:32', 0),
 (16, 'Thép V – 10mm – TV10', 'Thép V 10mm dùng cho khung kết cấu, chịu lực tốt và dễ lắp đặt.', 'Thép V 10mm TV10', 'THEP_TV10', 3, 2, 20000.00, 18000.00, 15000.00, 597, 10, 2000, 1.00, 'Cây', NULL, '[\"thep_v_10mm.jpg\"]', '{\"kích_thước\":\"10mm\",\"loại\":\"Thép V\",\"xuất_xứ\":\"Việt Nam\"}', 'active', 0, 0, '2025-11-25 08:53:51', '2025-12-23 06:43:46', 0),
 (17, 'Thép Tấm 6mm – TT6', 'Thép tấm 6mm chất lượng cao, dùng cho khung, mái, và các kết cấu thép.', 'Thép tấm 6mm TT6', 'THEP_TT6', 3, 1, 250000.00, 230000.00, 200000.00, 300, 10, 1000, 6.00, 'Tấm', NULL, '[\"thep_tam_6mm.jpg\"]', '{\"độ_dày\":\"6mm\",\"loại\":\"Thép tấm\",\"xuất_xứ\":\"Việt Nam\"}', 'active', 0, 0, '2025-11-25 08:54:04', '2025-11-25 08:54:04', 0);
 
@@ -278,6 +283,15 @@ CREATE TABLE `reviews` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `reviews`
+--
+
+INSERT INTO `reviews` (`id`, `order_id`, `product_id`, `user_id`, `rating`, `comment`, `created_at`) VALUES
+(1, 1, 15, 1, 4, '', '2025-12-23 08:54:07'),
+(2, 1, 14, 1, 4, '', '2025-12-23 08:54:07'),
+(3, 1, 16, 1, 5, '', '2025-12-23 08:54:07');
+
 -- --------------------------------------------------------
 
 --
@@ -296,6 +310,13 @@ CREATE TABLE `saved_addresses` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `saved_addresses`
+--
+
+INSERT INTO `saved_addresses` (`id`, `user_id`, `address_name`, `recipient_name`, `recipient_phone`, `province`, `address`, `is_default`, `created_at`, `updated_at`) VALUES
+(1, 1, 'nhà trọ', 'nam', '0379648264', 'Việt Nam', 'Trà Vinh', 0, '2025-12-23 08:47:44', '2025-12-23 08:47:44');
 
 -- --------------------------------------------------------
 
@@ -354,8 +375,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `PASSWORD`, `email`, `full_name`, `phone`, `address`, `role`, `created_at`, `updated_at`, `google_id`, `avatar_url`) VALUES
-(1, '', '$2y$12$c4BLjzUR4NRhWT3V3OT7suca2mg7mnthTtQNNWOKwsFZseurfFueu', 'namvokat@gmail.com', 'Nam Vo', '0379648264', 'trà vinh, Trà Vinh', 'admin', '2025-12-22 09:08:33', '2025-12-23 08:19:37', NULL, 'https://lh3.googleusercontent.com/a/ACg8ocLjawPef93lP_5luvFUEjtRO1P0ZZ8Mod4aN9NRcY9ANRnsrjw=s96-c'),
-(12, 'katuv3@gmail.com', '$2y$12$c4BLjzUR4NRhWT3V3OT7suca2mg7mnthTtQNNWOKwsFZseurfFueu', 'katuv3@gmail.com', 'Katuv3', NULL, NULL, '', '2025-12-23 08:11:09', '2025-12-23 08:19:38', NULL, NULL);
+(1, '', '$2y$12$c4BLjzUR4NRhWT3V3OT7suca2mg7mnthTtQNNWOKwsFZseurfFueu', 'namvokat@gmail.com', 'Nam Vo', '0379648264', 'Trà Vinh, Việt Nam', 'admin', '2025-12-22 09:08:33', '2025-12-23 09:07:57', NULL, 'https://lh3.googleusercontent.com/a/ACg8ocLjawPef93lP_5luvFUEjtRO1P0ZZ8Mod4aN9NRcY9ANRnsrjw=s96-c'),
+(12, 'katuv3@gmail.com', '$2y$12$c4BLjzUR4NRhWT3V3OT7suca2mg7mnthTtQNNWOKwsFZseurfFueu', 'katuv3@gmail.com', 'Katuv3', NULL, NULL, '', '2025-12-23 08:11:09', '2025-12-23 08:19:38', NULL, NULL),
+(13, '1@gmail.com', '$2y$12$MzajBh3sQS8VDTkJLWRrhe1sPkzlIpvSlRjEj8hEVHHvzXyw0r/mK', '1@gmail.com', 'CoNhanQuy', '0773998235', NULL, 'admin', '2025-12-23 09:07:32', '2025-12-23 09:08:07', NULL, NULL);
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -468,13 +490,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT cho bảng `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `cart_items`
 --
 ALTER TABLE `cart_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT cho bảng `categories`
@@ -492,13 +514,13 @@ ALTER TABLE `inventory`
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT cho bảng `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT cho bảng `payments`
@@ -522,13 +544,13 @@ ALTER TABLE `promotions`
 -- AUTO_INCREMENT cho bảng `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT cho bảng `saved_addresses`
 --
 ALTER TABLE `saved_addresses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `suppliers`
@@ -540,7 +562,7 @@ ALTER TABLE `suppliers`
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Các ràng buộc cho các bảng đã đổ

@@ -197,12 +197,12 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
             <tr class="hover:bg-gray-50">
               <td class="px-6 py-4 font-bold text-gray-500">#<?= $u['id'] ?></td>
               <td class="px-6 py-4">
-                <p class="font-bold text-gray-800"><?= htmlspecialchars($u['full_name']) ?></p>
+                <p class="font-bold text-gray-800"><?= htmlspecialchars($u['full_name'] ?? '') ?></p>
                 <p class="text-xs text-gray-500">Đăng ký: <?= date('d/m/Y', strtotime($u['created_at'])) ?></p>
               </td>
               <td class="px-6 py-4">
-                <p><i class="fas fa-envelope text-gray-400 w-4"></i> <?= htmlspecialchars($u['email']) ?></p>
-                <p><i class="fas fa-phone text-gray-400 w-4"></i> <?= htmlspecialchars($u['phone']) ?></p>
+                <p><i class="fas fa-envelope text-gray-400 w-4"></i> <?= htmlspecialchars($u['email'] ?? '') ?></p>
+                <p><i class="fas fa-phone text-gray-400 w-4"></i> <?= htmlspecialchars($u['phone'] ?? '') ?></p>
               </td>
               <td class="px-6 py-4 text-center">
                 <?php if ($u['role'] === 'admin'): ?>

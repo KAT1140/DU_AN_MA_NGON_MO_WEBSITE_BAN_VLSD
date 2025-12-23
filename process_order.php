@@ -67,26 +67,30 @@ if (!empty($errors)) {
     exit();
 }
 
-// Bắt đầu transaction
+    // Bắt đầu transaction
 $conn->begin_transaction();
 
 try {
     // Tạo mã đơn hàng
     $order_code = 'VLXD' . date('Ymd') . strtoupper(uniqid());
     
+    // Xác định payment_status và order_status dựa trên payment_method
+    $payment_status = ($payment_method === 'cod') ? 'pending' : 'pending';
+    $order_status = ($payment_method === 'cod') ? 'pending' : 'awaiting_payment';
+    
     // Insert vào bảng orders
     $order_sql = "INSERT INTO orders (
                     order_code, user_id, customer_name, customer_email, customer_phone, 
                     customer_address, province, shipping_address, note, subtotal, shipping_fee, 
                     total_amount, payment_method, payment_status, order_status
-                  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending')";
+                  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     $order_stmt = $conn->prepare($order_sql);
     $shipping_address = $customer_address . ', ' . $province;
-    $order_stmt->bind_param('sisssssssddss', 
+    $order_stmt->bind_param('sisssssssddssss', 
         $order_code, $user_id, $customer_name, $customer_email, $customer_phone,
         $customer_address, $province, $shipping_address, $note, $subtotal, $shipping_fee,
-        $total, $payment_method
+        $total, $payment_method, $payment_status, $order_status
     );
     
     if (!$order_stmt->execute()) {
@@ -146,11 +150,16 @@ try {
         'order_code' => $order_code,
         'order_id' => $order_id,
         'customer_name' => $customer_name,
-        'total' => $total
+        'total' => $total,
+        'payment_method' => $payment_method
     ];
     
-    // Chuyển đến trang thành công
-    header('Location: order_success.php');
+    // Chuyển đến trang thanh toán QR nếu là banking/momo, hoặc trang thành công nếu là COD
+    if ($payment_method === 'banking' || $payment_method === 'momo') {
+        header('Location: payment_qr.php?order_id=' . $order_id);
+    } else {
+        header('Location: order_success.php');
+    }
     exit();
     
 } catch (Exception $e) {

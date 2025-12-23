@@ -98,12 +98,28 @@ $items_stmt->close();
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Trạng thái:</span>
-                                    <span class="font-bold text-green-600">ĐÃ XÁC NHẬN</span>
+                                    <span class="font-bold text-green-600">
+                                        <?php 
+                                        if ($order_details['order_status'] == 'awaiting_payment') {
+                                            echo '<span class="text-yellow-600">CHỜ THANH TOÁN</span>';
+                                        } else {
+                                            echo 'ĐÃ XÁC NHẬN';
+                                        }
+                                        ?>
+                                    </span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Thanh toán:</span>
                                     <span class="font-bold">
-                                        <?= $order_details['payment_method'] == 'cod' ? 'COD' : 'Chuyển khoản' ?>
+                                        <?php 
+                                        if ($order_details['payment_method'] == 'cod') {
+                                            echo 'COD (Tiền mặt)';
+                                        } elseif ($order_details['payment_method'] == 'banking') {
+                                            echo 'Chuyển khoản';
+                                        } else {
+                                            echo 'MoMo';
+                                        }
+                                        ?>
                                     </span>
                                 </div>
                             </div>
@@ -181,27 +197,29 @@ $items_stmt->close();
                 </div>
 
                 <!-- Payment Instructions -->
-                <?php if ($order_details['payment_method'] == 'banking'): ?>
+                <?php if ($order_details['payment_method'] == 'banking' || $order_details['payment_method'] == 'momo'): ?>
+                <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-r-lg mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-check-circle text-green-600"></i> Xác nhận thanh toán
+                    </h3>
+                    <p class="text-gray-700 mb-2">
+                        <i class="fas fa-info-circle text-blue-500"></i> 
+                        Cảm ơn bạn đã xác nhận thanh toán! Đơn hàng của bạn đang được xử lý.
+                    </p>
+                    <p class="text-gray-600 text-sm">
+                        Chúng tôi sẽ kiểm tra và xác nhận thanh toán của bạn trong thời gian sớm nhất (5-15 phút trong giờ hành chính).
+                        Bạn sẽ nhận được thông báo qua email khi đơn hàng được xác nhận.
+                    </p>
+                </div>
+                <?php elseif ($order_details['payment_method'] == 'cod'): ?>
                 <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-lg mb-6">
                     <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <i class="fas fa-university text-blue-600"></i> Hướng dẫn thanh toán chuyển khoản
+                        <i class="fas fa-money-bill-wave text-green-600"></i> Thanh toán khi nhận hàng (COD)
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <p class="text-gray-700 mb-2">Vui lòng chuyển khoản với nội dung:</p>
-                            <div class="bg-white p-4 rounded-lg">
-                                <p class="font-bold text-orange-600"><?= $order_details['order_code'] ?></p>
-                            </div>
-                        </div>
-                        <div>
-                            <p class="text-gray-700 mb-2">Thông tin tài khoản:</p>
-                            <div class="bg-white p-4 rounded-lg">
-                                <p><span class="font-bold">Ngân hàng:</span> Vietcombank</p>
-                                <p><span class="font-bold">Số TK:</span> 123456789</p>
-                                <p><span class="font-bold">Chủ TK:</span> CÔNG TY TNHH VLXD PRO</p>
-                            </div>
-                        </div>
-                    </div>
+                    <p class="text-gray-700">
+                        Bạn sẽ thanh toán bằng tiền mặt khi nhận hàng. Vui lòng chuẩn bị số tiền 
+                        <span class="font-bold text-orange-600"><?= number_format($order_details['total_amount']) ?>đ</span>
+                    </p>
                 </div>
                 <?php endif; ?>
 
