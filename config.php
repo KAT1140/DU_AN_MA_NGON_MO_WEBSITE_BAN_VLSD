@@ -1,7 +1,7 @@
 <?php
 // Google OAuth configuration (so pages can use the same Client ID)
 $CLIENT_ID = "163478021174-5gi5hpjvpim2ktrg3oindgtvqtt1o7hq.apps.googleusercontent.com";
-$REDIRECT_URI = "http://localhost/vlxd/callback.php";
+$REDIRECT_URI = "http://localhost:8000/callback.php";
 
 // Development helper: set this to an email to auto-promote that account to admin on startup.
 // Example: $DEV_ADMIN_EMAIL = 'admin@example.com';
@@ -17,12 +17,6 @@ if ($conn->connect_error) die("Kết nối thất bại!");
 
 // Set charset to UTF-8
 $conn->set_charset("utf8mb4");
-
-// Ping để đảm bảo kết nối còn sống
-if (!$conn->ping()) {
-    $conn = new mysqli("localhost", "root", "", "vlxd_store1");
-    $conn->set_charset("utf8mb4");
-}
 
 // Auto create tables if not exist
 if (!isset($_SESSION['tables_created'])) {

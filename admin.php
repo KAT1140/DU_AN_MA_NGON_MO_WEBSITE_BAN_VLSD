@@ -137,6 +137,9 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
         <a href="admin_products.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm">
            <i class="fas fa-boxes"></i> Sản phẩm
         </a>
+        <a href="add_category.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm">
+           <i class="fas fa-folder-open"></i> Danh mục
+        </a>
         <a href="admin_orders.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm relative">
            <i class="fas fa-shopping-cart"></i> Đơn hàng
            <?php if ($pending_orders > 0): ?>

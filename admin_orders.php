@@ -213,6 +213,9 @@ if (!empty($params)) {
                         <a href="admin_products.php" class="px-4 py-2 rounded hover:bg-orange-700 transition">
                             <i class="fas fa-box"></i> Sản phẩm
                         </a>
+                        <a href="add_category.php" class="px-4 py-2 rounded hover:bg-orange-700 transition">
+                            <i class="fas fa-folder-open"></i> Danh mục
+                        </a>
                         <a href="admin_orders.php" class="px-4 py-2 rounded bg-orange-700 relative">
                             <i class="fas fa-shopping-cart"></i> Đơn hàng
                             <?php if ($pending_orders > 0): ?>

@@ -12,9 +12,19 @@ if (empty($token)) {
 
 // Xác thực ID token bằng endpoint của Google
 $url = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . urlencode($token);
-$resp = @file_get_contents($url);
-if ($resp === false) {
-    echo "Lỗi khi xác thực token với Google.";
+
+// Sử dụng cURL thay vì file_get_contents
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Tắt verify SSL cho localhost
+curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+$resp = curl_exec($ch);
+$error = curl_error($ch);
+curl_close($ch);
+
+if ($resp === false || !empty($error)) {
+    echo "Lỗi khi xác thực token với Google: " . htmlspecialchars($error);
     exit;
 }
 

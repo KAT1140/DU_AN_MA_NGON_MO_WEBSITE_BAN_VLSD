@@ -199,6 +199,12 @@ $products = $conn->query("SELECT p.id, p.NAME, p.description, p.short_descriptio
         <a href="admin.php" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
           <i class="fas fa-users"></i> Quản lý người dùng
         </a>
+        <a href="add_category.php" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
+          <i class="fas fa-folder-open"></i> Danh mục
+        </a>
+        <a href="admin_orders.php" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
+          <i class="fas fa-shopping-cart"></i> Đơn hàng
+        </a>
         <a href="index.php" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
           <i class="fas fa-home"></i> Trang chủ
         </a>

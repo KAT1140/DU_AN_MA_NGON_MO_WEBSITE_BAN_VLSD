@@ -14,6 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $user_id = $_SESSION['user_id'];
 
+// Lấy cart session
+$cart_session = session_id();
+
 // Lấy dữ liệu từ form
 $customer_name = trim($_POST['customer_name'] ?? '');
 $customer_email = trim($_POST['customer_email'] ?? '');

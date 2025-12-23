@@ -8,8 +8,15 @@ if (!isset($_SESSION['logged_in'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+$cart_session = session_id();
 $error = '';
 $success = '';
+
+// Hiển thị lỗi từ process_order.php nếu có
+if (isset($_SESSION['checkout_errors'])) {
+    $error = implode('<br>', $_SESSION['checkout_errors']);
+    unset($_SESSION['checkout_errors']);
+}
 
 // Lấy thông tin user
 $user_stmt = $conn->prepare("SELECT full_name, email, phone, address FROM users WHERE id = ?");
@@ -155,72 +162,74 @@ if ($cart_result->num_rows > 0) {
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Tỉnh/Thành phố *</label>
-                                <select name="province" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                    <option value="">Chọn tỉnh/thành phố</option>
-                                    <option value="An Giang">An Giang</option>
-                                    <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
-                                    <option value="Bắc Giang">Bắc Giang</option>
-                                    <option value="Bắc Kạn">Bắc Kạn</option>
-                                    <option value="Bạc Liêu">Bạc Liêu</option>
-                                    <option value="Bắc Ninh">Bắc Ninh</option>
-                                    <option value="Bến Tre">Bến Tre</option>
-                                    <option value="Bình Định">Bình Định</option>
-                                    <option value="Bình Dương">Bình Dương</option>
-                                    <option value="Bình Phước">Bình Phước</option>
-                                    <option value="Bình Thuận">Bình Thuận</option>
-                                    <option value="Cà Mau">Cà Mau</option>
-                                    <option value="Cần Thơ">Cần Thơ</option>
-                                    <option value="Cao Bằng">Cao Bằng</option>
-                                    <option value="Đà Nẵng">Đà Nẵng</option>
-                                    <option value="Đắk Lắk">Đắk Lắk</option>
-                                    <option value="Đắk Nông">Đắk Nông</option>
-                                    <option value="Điện Biên">Điện Biên</option>
-                                    <option value="Đồng Nai">Đồng Nai</option>
-                                    <option value="Đồng Tháp">Đồng Tháp</option>
-                                    <option value="Gia Lai">Gia Lai</option>
-                                    <option value="Hà Giang">Hà Giang</option>
-                                    <option value="Hà Nam">Hà Nam</option>
-                                    <option value="Hà Nội">Hà Nội</option>
-                                    <option value="Hà Tĩnh">Hà Tĩnh</option>
-                                    <option value="Hải Dương">Hải Dương</option>
-                                    <option value="Hải Phòng">Hải Phòng</option>
-                                    <option value="Hậu Giang">Hậu Giang</option>
-                                    <option value="Hòa Bình">Hòa Bình</option>
-                                    <option value="Hưng Yên">Hưng Yên</option>
-                                    <option value="Khánh Hòa">Khánh Hòa</option>
-                                    <option value="Kiên Giang">Kiên Giang</option>
-                                    <option value="Kon Tum">Kon Tum</option>
-                                    <option value="Lai Châu">Lai Châu</option>
-                                    <option value="Lâm Đồng">Lâm Đồng</option>
-                                    <option value="Lạng Sơn">Lạng Sơn</option>
-                                    <option value="Lào Cai">Lào Cai</option>
-                                    <option value="Long An">Long An</option>
-                                    <option value="Nam Định">Nam Định</option>
-                                    <option value="Nghệ An">Nghệ An</option>
-                                    <option value="Ninh Bình">Ninh Bình</option>
-                                    <option value="Ninh Thuận">Ninh Thuận</option>
-                                    <option value="Phú Thọ">Phú Thọ</option>
-                                    <option value="Phú Yên">Phú Yên</option>
-                                    <option value="Quảng Bình">Quảng Bình</option>
-                                    <option value="Quảng Nam">Quảng Nam</option>
-                                    <option value="Quảng Ngãi">Quảng Ngãi</option>
-                                    <option value="Quảng Ninh">Quảng Ninh</option>
-                                    <option value="Quảng Trị">Quảng Trị</option>
-                                    <option value="Sóc Trăng">Sóc Trăng</option>
-                                    <option value="Sơn La">Sơn La</option>
-                                    <option value="Tây Ninh">Tây Ninh</option>
-                                    <option value="Thái Bình">Thái Bình</option>
-                                    <option value="Thái Nguyên">Thái Nguyên</option>
-                                    <option value="Thanh Hóa">Thanh Hóa</option>
-                                    <option value="Thừa Thiên Huế">Thừa Thiên Huế</option>
-                                    <option value="Tiền Giang">Tiền Giang</option>
-                                    <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                                    <option value="Trà Vinh">Trà Vinh</option>
-                                    <option value="Tuyên Quang">Tuyên Quang</option>
-                                    <option value="Vĩnh Long">Vĩnh Long</option>
-                                    <option value="Vĩnh Phúc">Vĩnh Phúc</option>
-                                    <option value="Yên Bái">Yên Bái</option>
-                                </select>
+                                <input type="text" name="province" required list="provinces-list" 
+                                       placeholder="Nhập hoặc chọn tỉnh/thành phố"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                <datalist id="provinces-list">
+                                    <option value="An Giang">
+                                    <option value="Bà Rịa - Vũng Tàu">
+                                    <option value="Bắc Giang">
+                                    <option value="Bắc Kạn">
+                                    <option value="Bạc Liêu">
+                                    <option value="Bắc Ninh">
+                                    <option value="Bến Tre">
+                                    <option value="Bình Định">
+                                    <option value="Bình Dương">
+                                    <option value="Bình Phước">
+                                    <option value="Bình Thuận">
+                                    <option value="Cà Mau">
+                                    <option value="Cần Thơ">
+                                    <option value="Cao Bằng">
+                                    <option value="Đà Nẵng">
+                                    <option value="Đắk Lắk">
+                                    <option value="Đắk Nông">
+                                    <option value="Điện Biên">
+                                    <option value="Đồng Nai">
+                                    <option value="Đồng Tháp">
+                                    <option value="Gia Lai">
+                                    <option value="Hà Giang">
+                                    <option value="Hà Nam">
+                                    <option value="Hà Nội">
+                                    <option value="Hà Tĩnh">
+                                    <option value="Hải Dương">
+                                    <option value="Hải Phòng">
+                                    <option value="Hậu Giang">
+                                    <option value="Hòa Bình">
+                                    <option value="Hưng Yên">
+                                    <option value="Khánh Hòa">
+                                    <option value="Kiên Giang">
+                                    <option value="Kon Tum">
+                                    <option value="Lai Châu">
+                                    <option value="Lâm Đồng">
+                                    <option value="Lạng Sơn">
+                                    <option value="Lào Cai">
+                                    <option value="Long An">
+                                    <option value="Nam Định">
+                                    <option value="Nghệ An">
+                                    <option value="Ninh Bình">
+                                    <option value="Ninh Thuận">
+                                    <option value="Phú Thọ">
+                                    <option value="Phú Yên">
+                                    <option value="Quảng Bình">
+                                    <option value="Quảng Nam">
+                                    <option value="Quảng Ngãi">
+                                    <option value="Quảng Ninh">
+                                    <option value="Quảng Trị">
+                                    <option value="Sóc Trăng">
+                                    <option value="Sơn La">
+                                    <option value="Tây Ninh">
+                                    <option value="Thái Bình">
+                                    <option value="Thái Nguyên">
+                                    <option value="Thanh Hóa">
+                                    <option value="Thừa Thiên Huế">
+                                    <option value="Tiền Giang">
+                                    <option value="TP. Hồ Chí Minh">
+                                    <option value="Trà Vinh">
+                                    <option value="Tuyên Quang">
+                                    <option value="Vĩnh Long">
+                                    <option value="Vĩnh Phúc">
+                                    <option value="Yên Bái">
+                                </datalist>
                             </div>
                         </div>
                         
@@ -358,17 +367,8 @@ if ($cart_result->num_rows > 0) {
                         </div>
                     </div>
                     
-                    <!-- Terms & Submit -->
+                    <!-- Submit -->
                     <div class="p-6">
-                        <div class="mb-4">
-                            <label class="flex items-start gap-2 cursor-pointer">
-                                <input type="checkbox" required class="mt-1">
-                                <span class="text-sm text-gray-600">
-                                    Tôi đồng ý với <a href="#" class="text-orange-600 hover:underline">điều khoản và điều kiện</a> của VLXD PRO
-                                </span>
-                            </label>
-                        </div>
-                        
                         <button type="submit" class="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-4 rounded-lg font-bold text-lg hover:shadow-lg transition">
                             <i class="fas fa-lock"></i> ĐẶT HÀNG NGAY
                         </button>
