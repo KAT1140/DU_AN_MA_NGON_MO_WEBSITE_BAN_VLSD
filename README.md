@@ -1,12 +1,74 @@
-# 🏢 VLXD KAT - Website Bán Vật Liệu Xây Dựng
+<div align="center">
 
-Website thương mại điện tử chuyên cung cấp vật liệu xây dựng được xây dựng với PHP, MySQL, Tailwind CSS và Font Awesome.
+# 🏗️ VLXD KAT - E-Commerce Platform
+
+### 🏢 Website Bán Vật Liệu Xây Dựng Chuyên Nghiệp
+
+**Hệ thống thương mại điện tử toàn diện cho ngành vật liệu xây dựng**  
+*Được xây dựng với PHP, MySQL, Tailwind CSS và tích hợp thanh toán thông minh*
+
+---
 
 ![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-5.7+-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.x-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Google OAuth](https://img.shields.io/badge/Google_OAuth-2.0-4285F4?style=for-the-badge&logo=google&logoColor=white)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
+[![GitHub last commit](https://img.shields.io/github/last-commit/KAT1140/DU_AN_MA_NGON_MO_WEBSITE_BAN_VLSD?style=for-the-badge)](https://github.com/KAT1140/DU_AN_MA_NGON_MO_WEBSITE_BAN_VLSD/commits)
+
+[🌟 Features](#-chức-năng-chính) • [🚀 Installation](#-cài-đặt) • [📖 Documentation](#-cấu-trúc-database) • [🤝 Contributing](#-đóng-góp)
+
+</div>
+
+---
+
+## 📑 Table of Contents
+
+- [✨ Highlights](#-highlights)
+- [🚀 Công nghệ sử dụng](#-công-nghệ-sử-dụng)
+- [🎨 Chức năng chính](#-chức-năng-chính)
+- [📦 Cài đặt](#-cài-đặt)
+- [📄 Cấu trúc file](#-cấu-trúc-file-chính)
+- [🗄️ Cấu trúc Database](#️-cấu-trúc-database)
+- [🔑 Google OAuth Setup](#-cấu-hình-google-oauth-tùy-chọn)
+- [🔄 Changelog](#-changelog)
+- [🤝 Đóng góp](#-đóng-góp)
+- [👨‍💻 Tác giả](#-tác-giả)
+- [📄 License](#-license)
+
+---
+
+## ✨ Highlights
+
+<table>
+<tr>
+<td width="50%">
+
+### 🎯 **Tính năng nổi bật**
+- ⚡ **Real-time Cart**: AJAX không reload trang
+- 💳 **Multi Payment**: COD, QR Banking, MoMo
+- 🔐 **OAuth 2.0**: Đăng nhập Google an toàn
+- 📦 **Inventory System**: Quản lý tồn kho thông minh
+- ⭐ **Review System**: Đánh giá sản phẩm sau mua
+- 📱 **Responsive Design**: Mobile-first approach
+
+</td>
+<td width="50%">
+
+### 💡 **Công nghệ hiện đại**
+- 🔒 **Security**: Bcrypt, Prepared Statements
+- 🎨 **UI/UX**: Tailwind CSS 3.x
+- 📊 **Admin Dashboard**: Thống kê nâng cao
+- 🏦 **Personal Payment**: MoMo & MB Bank
+- 🖼️ **Image Management**: JSON storage
+- 🚀 **Performance**: Optimized queries
+
+</td>
+</tr>
+</table>
 
 ## 🚀 Công nghệ sử dụng
 
@@ -22,35 +84,95 @@ Website thương mại điện tử chuyên cung cấp vật liệu xây dựng 
 
 ## 📦 Cài đặt
 
-### Yêu cầu hệ thống
-- XAMPP (Apache + MySQL + PHP 8.0+)
-- Git
-- Trình duyệt hiện đại (Chrome, Firefox, Edge)
-- Google Cloud Console (cho OAuth - tùy chọn)
+### 🔧 Yêu cầu hệ thống
 
-### Các bước cài đặt
+| Yêu cầu | Phiên bản | Ghi chú |
+|---------|-----------|----------|
+| 🟦 XAMPP | Latest | Apache + MySQL + PHP |
+| 🟩 PHP | 8.0+ | **Bắt buộc** |
+| 🟨 MySQL/MariaDB | 5.7+ | Database server |
+| 🟪 Git | Latest | Version control |
+| 🌐 Browser | Modern | Chrome/Firefox/Edge |
+| ☁️ Google Cloud | Optional | Cho OAuth 2.0 |
 
-1. **Clone repository:**
+### 🚀 Quick Start - Cài đặt trong 5 phút!
+
+#### **Bước 1️⃣: Clone Repository**
 ```bash
 git clone https://github.com/KAT1140/DU_AN_MA_NGON_MO_WEBSITE_BAN_VLSD.git
 cd DU_AN_MA_NGON_MO_WEBSITE_BAN_VLSD
 ```
 
-2. **Tạo cơ sở dữ liệu:**
-   - Mở phpMyAdmin: `http://localhost/phpmyadmin`
-   - Tạo database mới: `vlxd_store1` (CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci)
-   - Import file `vlxd_storemoi.sql`
+#### **Bước 2️⃣: Setup Database**
+```bash
+# Mở phpMyAdmin
+http://localhost/phpmyadmin
 
-3. **Cấu hình:**
-   - Kiểm tra file `config.php` - database name là `vlxd_store1`
-   - Cập nhật thông tin Google OAuth (nếu dùng):
-     - `$CLIENT_ID` - Google Client ID
-     - `$REDIRECT_URI` - Callback URL
-     - `$DEV_ADMIN_EMAIL` - Email admin mặc định
+# Tạo database mới
+CREATE DATABASE vlxd_store1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-4. **Chạy ứng dụng:**
-   - Khởi động XAMPP (Apache + MySQL)
-   - Truy cập: `http://localhost/vlxd`
+# Import SQL file (nếu có)
+# hoặc để config.php tự động tạo tables
+```
+
+> 💡 **Tips**: Database sẽ được tự động tạo tables khi chạy lần đầu!
+
+#### **Bước 3️⃣: Cấu hình (Optional)**
+
+Mở file `config.php` và kiểm tra:
+```php
+$conn = new mysqli("localhost", "root", "", "vlxd_store1");
+$DEV_ADMIN_EMAIL = 'your-email@gmail.com'; // Admin account
+```
+
+> ⚠️ **Important**: Để sử dụng Google OAuth, cần setup Google Cloud Console (xem phần [Google OAuth Setup](#-cấu-hình-google-oauth-tùy-chọn))
+
+#### **Bước 4️⃣: Chạy Application**
+```bash
+# 1. Khởi động XAMPP Control Panel
+# 2. Start Apache và MySQL
+# 3. Truy cập:
+http://localhost/vlxd
+```
+
+### ✅ Kiểm tra cài đặt thành công
+
+- ✔️ Trang chủ hiển thị bình thường
+- ✔️ Đăng nhập/Đăng ký hoạt động
+- ✔️ Giỏ hàng thêm sản phẩm được
+- ✔️ Admin panel accessible (sau khi đăng nhập admin)
+
+### 🆘 Troubleshooting
+
+<details>
+<summary><b>❌ Lỗi "mysqli not found"</b></summary>
+
+```ini
+# Trong php.ini, uncomment dòng:
+extension=mysqli
+```
+</details>
+
+<details>
+<summary><b>❌ Lỗi kết nối database</b></summary>
+
+1. Kiểm tra MySQL đang chạy trong XAMPP
+2. Verify username/password trong `config.php`
+3. Đảm bảo database `vlxd_store1` đã được tạo
+</details>
+
+<details>
+<summary><b>❌ Lỗi upload hình ảnh</b></summary>
+
+```bash
+# Kiểm tra quyền folder uploads/
+chmod 755 uploads/
+
+# Kiểm tra php.ini:
+upload_max_filesize = 10M
+post_max_size = 10M
+```
+</details>
 
 ## 📄 Cấu trúc file chính
 
