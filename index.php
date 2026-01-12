@@ -44,10 +44,42 @@ header('Content-Type: text/html; charset=utf-8');
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.3); }
     }
+    
+    /* CSS cho grid layout đồng đều */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      align-items: stretch;
+    }
+    
+    .product-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 450px;
+    }
+    
+    .product-card .card-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .product-card .card-actions {
+      margin-top: auto;
+      padding-top: 1rem;
+    }
+    
+    @media (min-width: 768px) {
+      .product-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <header class="bg-gradient-to-r from-orange-500 to-amber-500 text-white sticky top-0 z-50 shadow-xl">
+  <header class="bg-gradient-to-r from-purple-500 to-blue-500 text-white sticky top-0 z-50 shadow-xl">
     <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
       <a href="index.php" class="flex items-center gap-4 hover:opacity-90 transition">
         <img src="uploads/logo.png" alt="VLXD Logo" class="w-16 h-16 object-cover rounded-full">
@@ -55,7 +87,7 @@ header('Content-Type: text/html; charset=utf-8');
       </a>
       <div class="flex items-center gap-8">
         <nav class="flex items-center gap-6">
-          <a href="products.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2">
+          <a href="products.php" class="text-white font-bold hover:text-purple-200 transition text-lg flex items-center gap-2">
             <i class="fas fa-box"></i> Sản phẩm
           </a>
         </nav>
@@ -64,12 +96,12 @@ header('Content-Type: text/html; charset=utf-8');
           <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
             <div class="flex items-center gap-3">
               <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-                <a href="admin.php" class="bg-yellow-400 text-orange-900 px-4 py-2 rounded-full font-bold hover:bg-yellow-300 transition flex items-center gap-2 shadow-lg text-sm">
+                <a href="admin.php" class="bg-yellow-400 text-purple-900 px-4 py-2 rounded-full font-bold hover:bg-yellow-300 transition flex items-center gap-2 shadow-lg text-sm">
                   <i class="fas fa-user-shield"></i> Quản trị
                 </a>
               <?php endif; ?>
 
-              <a href="profile.php" class="text-white font-bold hover:text-orange-200 transition text-lg">
+              <a href="profile.php" class="text-white font-bold hover:text-purple-200 transition text-lg">
                 👤 <?= htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['user_email']) ?>
               </a>
               <a href="logout.php" class="bg-red-600 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition">
@@ -77,10 +109,10 @@ header('Content-Type: text/html; charset=utf-8');
               </a>
             </div>
           <?php else: ?>
-            <a href="login.php" class="bg-white text-orange-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition">
+            <a href="login.php" class="bg-white text-purple-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition">
               Đăng nhập
             </a>
-            <a href="dangki.php" class="border-2 border-white text-white px-6 py-3 rounded-full font-bold hover:bg-orange-400 transition">
+            <a href="dangki.php" class="border-2 border-white text-white px-6 py-3 rounded-full font-bold hover:bg-purple-400 transition">
               Đăng ký
             </a>
           <?php endif; ?>
@@ -95,7 +127,7 @@ header('Content-Type: text/html; charset=utf-8');
 
           // Logic: Luôn tạo thẻ span (có id="cart-count"), nếu count=0 thì ẩn đi (class hidden)
           $hiddenClass = ($count > 0) ? '' : 'hidden';
-          echo "<span id='cart-count' class='absolute -top-2 -right-2 bg-white text-orange-600 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md $hiddenClass'>{$count}</span>";
+          echo "<span id='cart-count' class='absolute -top-2 -right-2 bg-white text-purple-600 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md $hiddenClass'>{$count}</span>";
           ?>
         </a>
         </a>
@@ -104,15 +136,15 @@ header('Content-Type: text/html; charset=utf-8');
   </header>
 
   <!-- Hero Banner -->
-  <div class="bg-gradient-to-r from-orange-400 to-amber-400 text-white py-20">
+  <div class="bg-gradient-to-r from-purple-400 to-blue-400 text-white py-20">
     <div class="max-w-7xl mx-auto px-10 text-center">
       <h1 class="text-6xl font-black mb-4">🏗️ VLXD KAT</h1>
       <p class="text-2xl mb-8">Vật Liệu Xây Dựng Chất Lượng Cao - Giá Cả Cạnh Tranh</p>
       <div class="flex justify-center gap-4">
-        <a href="products.php" class="bg-white text-orange-500 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition shadow-xl">
+        <a href="products.php" class="bg-white text-purple-500 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition shadow-xl">
           <i class="fas fa-shopping-bag"></i> Xem tất cả sản phẩm
         </a>
-        <a href="#featured" class="bg-orange-500 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-orange-600 transition shadow-xl">
+        <a href="#featured" class="bg-purple-500 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-purple-600 transition shadow-xl">
           <i class="fas fa-star"></i> Sản phẩm nổi bật
         </a>
       </div>
@@ -158,7 +190,15 @@ header('Content-Type: text/html; charset=utf-8');
         if ($result_new && $result_new->num_rows > 0) {
             while ($p = $result_new->fetch_assoc()) {
                 $images = json_decode($p['images'], true);
-                $image_url = !empty($images) ? $images[0] : 'https://via.placeholder.com/300x300?text=No+Image';
+                $image_url = 'https://via.placeholder.com/300x300?text=No+Image';
+                if (!empty($images)) {
+                    $first_image = $images[0];
+                    if (strpos($first_image, 'uploads/') === 0) {
+                        $image_url = $first_image;
+                    } else {
+                        $image_url = 'uploads/' . $first_image;
+                    }
+                }
                 $display_price = $p['sale_price'] ?? $p['price'];
                 
                 echo "<div class='bg-white rounded-2xl shadow-2xl p-6 text-center hover:shadow-3xl transition flex flex-col h-full transform hover:-translate-y-2 duration-300'>
@@ -195,12 +235,12 @@ header('Content-Type: text/html; charset=utf-8');
 
   <!-- Sản phẩm nổi bật -->
   <div class="max-w-7xl mx-auto px-10 py-16" id="featured">
-    <h2 class="text-5xl font-black text-center text-orange-500 mb-6">
+    <h2 class="text-5xl font-black text-center text-purple-500 mb-6">
       <i class="fas fa-star"></i> SẢN PHẨM NỔI BẬT
     </h2>
     <p class="text-center text-gray-600 mb-10 text-lg">Được đánh giá cao và bán chạy nhất</p>
 
-    <div class="grid md:grid-cols-4 gap-8">
+    <div class="product-grid">
       <?php
       $cat_id = '';
 
@@ -224,15 +264,25 @@ header('Content-Type: text/html; charset=utf-8');
       if ($result && $result->num_rows > 0) {
           while ($p = $result->fetch_assoc()) {
               $images = json_decode($p['images'], true);
-              $image_url = !empty($images) ? $images[0] : 'https://via.placeholder.com/300x300?text=No+Image';
+              $image_url = 'https://via.placeholder.com/300x300?text=No+Image';
+              if (!empty($images)) {
+                  $first_image = $images[0];
+                  if (strpos($first_image, 'uploads/') === 0) {
+                      $image_url = $first_image;
+                  } else {
+                      $image_url = 'uploads/' . $first_image;
+                  }
+              }
               $display_price = $p['sale_price'] ?? $p['price'];
               $avg_rating = round($p['avg_rating'], 1);
               $review_count = $p['review_count'];
               
-              echo "<div class='bg-white rounded-2xl shadow-2xl p-6 text-center hover:shadow-3xl transition flex flex-col h-full transform hover:-translate-y-2 duration-300'>
-                      <div class='flex-grow'>
-                        <div class='relative group-hover:scale-105 transition duration-300'>
-                            <img src='" . htmlspecialchars($image_url) . "' alt='" . htmlspecialchars($p['NAME']) . "' class='bg-gray-200 h-48 w-full object-cover rounded-xl mb-6'>";
+              echo "<div class='product-card bg-white rounded-2xl shadow-2xl p-6 text-center hover:shadow-3xl transition duration-300 transform hover:-translate-y-2'>
+                      <div class='card-content'>
+                        <div class='relative mb-4'>
+                            <a href='product_detail.php?id={$p['id']}' class='block'>
+                                <img src='" . htmlspecialchars($image_url) . "' alt='" . htmlspecialchars($p['NAME']) . "' class='bg-gray-200 h-48 w-full object-cover rounded-xl hover:opacity-90 transition'>
+                            </a>";
               
               if ($avg_rating > 0) {
                   echo "<span class='absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1'>
@@ -241,17 +291,26 @@ header('Content-Type: text/html; charset=utf-8');
               }
               
               echo "        </div>
-                        <h3 class='font-bold text-xl mb-2 line-clamp-2 min-h-[3.5rem]'>" . htmlspecialchars($p['NAME']) . "</h3>
-                        <p class='text-3xl font-black text-orange-500 mb-2'>" . number_format($display_price, 0, ',', '.') . "đ</p>
+                        <div class='flex-grow flex flex-col justify-center'>
+                            <a href='product_detail.php?id={$p['id']}' class='block hover:text-purple-600 transition'>
+                                <h3 class='font-bold text-xl mb-3 line-clamp-2 min-h-[3rem] flex items-center justify-center'>" . htmlspecialchars($p['NAME']) . "</h3>
+                            </a>
+                            <p class='text-3xl font-black text-purple-500 mb-4'>" . number_format($display_price, 0, ',', '.') . "đ</p>
+                        </div>
                       </div>
                       
-                      <form action='add_to_cart.php' method='POST' class='mt-auto add-to-cart-form'>
-                        <input type='hidden' name='product_id' value='{$p['id']}'>
-                        <input type='hidden' name='quantity' value='1'>
-                        <button type='submit' class='w-full bg-orange-500 text-white py-4 rounded-xl font-bold hover:bg-orange-600 text-xl shadow-lg transform active:scale-95 transition'>
-                          <i class='fas fa-cart-plus'></i> Thêm vào giỏ
-                        </button>
-                      </form>
+                      <div class='card-actions space-y-2'>
+                        <a href='product_detail.php?id={$p['id']}' class='block w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition'>
+                            <i class='fas fa-eye'></i> Xem chi tiết
+                        </a>
+                        <form action='add_to_cart.php' method='POST' class='add-to-cart-form' onclick='event.stopPropagation();'>
+                            <input type='hidden' name='product_id' value='{$p['id']}'>
+                            <input type='hidden' name='quantity' value='1'>
+                            <button type='submit' class='w-full bg-purple-500 text-white py-2 rounded-lg font-semibold hover:bg-purple-600 transition'>
+                                <i class='fas fa-cart-plus'></i> Thêm vào giỏ
+                            </button>
+                        </form>
+                      </div>
                     </div>";
           }
       } else {

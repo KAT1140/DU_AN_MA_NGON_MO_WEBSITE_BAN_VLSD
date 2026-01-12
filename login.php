@@ -11,18 +11,18 @@ require 'config.php';
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body class="bg-gradient-to-br from-orange-50 to-orange-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gradient-to-br from-purple-50 to-purple-100 min-h-screen flex items-center justify-center p-4">
   <!-- Container chính -->
   <div class="w-full max-w-md">
     <!-- Card chính -->
     <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
       <!-- Header gradient -->
-      <div class="bg-gradient-to-r from-orange-600 to-orange-500 px-8 py-12 text-center">
+      <div class="bg-gradient-to-r from-purple-600 to-blue-500 px-8 py-12 text-center">
         <a href="index.php" class="inline-block hover:opacity-90 transition">
           <img src="uploads/logo.png" alt="VLXD Logo" class="w-20 h-20 rounded-full mx-auto mb-4 shadow-lg object-cover">
         </a>
         <h1 class="text-4xl font-black text-white">VLXD KAT</h1>
-        <p class="text-orange-100 mt-2 font-semibold">Đăng nhập để tiếp tục mua hàng</p>
+        <p class="text-purple-100 mt-2 font-semibold">Đăng nhập để tiếp tục mua hàng</p>
       </div>
 
       <!-- Content -->
@@ -68,7 +68,7 @@ require 'config.php';
               name="email" 
               placeholder="example@gmail.com" 
               required 
-              class="w-full px-5 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+              class="w-full px-5 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
             >
           </div>
 
@@ -80,7 +80,7 @@ require 'config.php';
               name="pass" 
               placeholder="Nhập mật khẩu của bạn" 
               required 
-              class="w-full px-5 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+              class="w-full px-5 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
             >
           </div>
 
@@ -90,13 +90,13 @@ require 'config.php';
               <input type="checkbox" name="remember" class="w-4 h-4 rounded">
               <span class="text-gray-600">Ghi nhớ tôi</span>
             </label>
-            <a href="#" class="text-orange-600 hover:text-orange-700 font-semibold">Quên mật khẩu?</a>
+            <a href="#" class="text-purple-600 hover:text-purple-700 font-semibold">Quên mật khẩu?</a>
           </div>
 
           <!-- Submit Button -->
           <button 
             type="submit" 
-            class="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 rounded-xl font-bold hover:shadow-lg transition mt-6 text-lg"
+            class="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 rounded-xl font-bold hover:shadow-lg transition mt-6 text-lg"
           >
             🔓 Đăng Nhập
           </button>
@@ -106,7 +106,7 @@ require 'config.php';
         <div class="text-center mt-6">
           <p class="text-gray-600">
             Chưa có tài khoản? 
-            <a href="dangki.php" class="text-orange-600 font-bold hover:text-orange-700 transition">Đăng ký ngay</a>
+            <a href="dangki.php" class="text-purple-600 font-bold hover:text-purple-700 transition">Đăng ký ngay</a>
           </p>
         </div>
       </div>
@@ -114,7 +114,7 @@ require 'config.php';
 
     <!-- Footer -->
     <div class="text-center mt-6">
-      <a href="index.php" class="text-gray-600 hover:text-orange-600 font-semibold transition">
+      <a href="index.php" class="text-gray-600 hover:text-purple-600 font-semibold transition">
         ← Quay lại trang chủ
       </a>
     </div>

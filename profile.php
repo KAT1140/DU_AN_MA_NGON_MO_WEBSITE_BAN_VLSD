@@ -68,17 +68,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <header class="bg-white sticky top-0 z-50 shadow-md">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <a href="index.php" class="flex items-center gap-3 hover:opacity-80 transition">
-                <div class="w-10 h-10 bg-gradient-to-br from-orange-600 to-orange-500 rounded-lg flex items-center justify-center">
+                <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-500 rounded-lg flex items-center justify-center">
                     <span class="text-white text-lg font-black">VL</span>
                 </div>
                 <h1 class="text-xl font-black text-gray-800">VLXD PRO</h1>
             </a>
             
             <nav class="flex gap-2">
-                <a href="index.php" class="text-gray-700 hover:text-orange-600 transition font-bold">
+                <a href="index.php" class="text-gray-700 hover:text-purple-600 transition font-bold">
                     <i class="fas fa-home"></i> Trang chủ
                 </a>
-                <a href="cart.php" class="text-gray-700 hover:text-orange-600 transition font-bold">
+                <a href="cart.php" class="text-gray-700 hover:text-purple-600 transition font-bold">
                     <i class="fas fa-shopping-cart"></i> Giỏ hàng
                 </a>
                 <a href="logout.php" class="text-red-600 hover:text-red-700 transition font-bold">
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Page Header -->
         <div class="mb-8">
             <h1 class="text-4xl font-black text-gray-800 mb-2">
-                <i class="fas fa-user-circle text-orange-600"></i> Hồ sơ cá nhân
+                <i class="fas fa-user-circle text-purple-600"></i> Hồ sơ cá nhân
             </h1>
             <p class="text-gray-600">Quản lý thông tin và cài đặt tài khoản của bạn</p>
         </div>
@@ -118,18 +118,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-md overflow-hidden sticky top-24">
                     <!-- Avatar Section -->
-                    <div class="bg-gradient-to-r from-orange-600 to-orange-500 p-6 text-center">
+                    <div class="bg-gradient-to-r from-purple-600 to-blue-500 p-6 text-center">
                         <div class="w-24 h-24 mx-auto mb-4 relative">
                             <?php if (!empty($user['avatar_url'])): ?>
                                 <img src="<?= htmlspecialchars($user['avatar_url']) ?>" alt="Avatar" class="w-full h-full rounded-full border-4 border-white object-cover">
                             <?php else: ?>
                                 <div class="w-full h-full rounded-full border-4 border-white bg-white flex items-center justify-center">
-                                    <i class="fas fa-user text-4xl text-orange-600"></i>
+                                    <i class="fas fa-user text-4xl text-purple-600"></i>
                                 </div>
                             <?php endif; ?>
                         </div>
                         <h2 class="text-white text-xl font-bold"><?= htmlspecialchars($user['full_name'] ?? 'Chưa cập nhật') ?></h2>
-                        <p class="text-orange-100 text-sm mt-1">
+                        <p class="text-purple-100 text-sm mt-1">
                             <i class="fas fa-envelope mr-1"></i><?= htmlspecialchars($user['email']) ?>
                         </p>
                     </div>
@@ -163,11 +163,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <a href="admin.php" class="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg transition font-bold text-sm">
                                     <i class="fas fa-users"></i> Người dùng
                                 </a>
-                                <a href="admin_products.php" class="flex items-center gap-2 bg-orange-50 hover:bg-orange-100 text-orange-700 px-4 py-2 rounded-lg transition font-bold text-sm">
+                                <a href="admin_products.php" class="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-2 rounded-lg transition font-bold text-sm">
                                     <i class="fas fa-boxes"></i> Sản phẩm
                                 </a>
                                 <a href="admin_orders.php" class="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-4 py-2 rounded-lg transition font-bold text-sm">
                                     <i class="fas fa-shopping-cart"></i> Đơn hàng
+                                </a>
+                                <a href="admin_suppliers.php" class="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg transition font-bold text-sm">
+                                    <i class="fas fa-truck"></i> Nhà phân phối
+                                </a>
+                                <a href="inventory_management.php" class="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-2 rounded-lg transition font-bold text-sm">
+                                    <i class="fas fa-warehouse"></i> Kho hàng
                                 </a>
                             </div>
                         <?php endif; ?>
@@ -213,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </label>
                             <input type="text" name="full_name" value="<?= htmlspecialchars($user['full_name'] ?? '') ?>" required 
                                    placeholder="Nhập họ tên của bạn"
-                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition">
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition">
                         </div>
 
                         <!-- Phone -->
@@ -223,7 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </label>
                             <input type="tel" name="phone" value="<?= htmlspecialchars($user['phone'] ?? '') ?>" 
                                    placeholder="Ví dụ: 0123456789"
-                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition">
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition">
                         </div>
 
                         <!-- Address -->
@@ -233,12 +239,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </label>
                             <textarea name="address" rows="4" 
                                       placeholder="Nhập địa chỉ của bạn"
-                                      class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition resize-none"><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
+                                      class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition resize-none"><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
                         </div>
 
                         <!-- Submit Button -->
                         <div class="flex gap-4">
-                            <button type="submit" class="flex-1 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white py-4 rounded-lg font-bold text-lg transition shadow-lg">
+                            <button type="submit" class="flex-1 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-purple-600 text-white py-4 rounded-lg font-bold text-lg transition shadow-lg">
                                 <i class="fas fa-save mr-2"></i>Cập nhật thông tin
                             </button>
                             <a href="logout.php" class="flex-1 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white py-4 rounded-lg font-bold text-lg transition shadow-lg text-center flex items-center justify-center gap-2">

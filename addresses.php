@@ -82,16 +82,16 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
-    <header class="bg-gradient-to-r from-orange-600 to-orange-500 text-white sticky top-0 z-50 shadow-xl">
+    <header class="bg-gradient-to-r from-purple-600 to-blue-500 text-white sticky top-0 z-50 shadow-xl">
         <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
             <a href="index.php" class="flex items-center gap-4 hover:opacity-90 transition">
                 <img src="uploads/logo.png" alt="VLXD Logo" class="w-16 h-16 object-cover rounded-full">
                 <h1 class="text-3xl font-black">VLXD KAT</h1>
             </a>
             <div class="flex items-center gap-4">
-                <a href="profile.php" class="text-white hover:text-orange-200"><i class="fas fa-user"></i> Tài khoản</a>
-                <a href="cart.php" class="text-white hover:text-orange-200"><i class="fas fa-shopping-cart"></i> Giỏ hàng</a>
-                <a href="logout.php" class="text-white hover:text-orange-200"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                <a href="profile.php" class="text-white hover:text-purple-200"><i class="fas fa-user"></i> Tài khoản</a>
+                <a href="cart.php" class="text-white hover:text-purple-200"><i class="fas fa-shopping-cart"></i> Giỏ hàng</a>
+                <a href="logout.php" class="text-white hover:text-purple-200"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
             </div>
         </div>
     </header>
@@ -112,7 +112,7 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
         <?php endif; ?>
 
         <!-- Nút thêm địa chỉ -->
-        <button onclick="showAddModal()" class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 mb-6">
+        <button onclick="showAddModal()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 mb-6">
             <i class="fas fa-plus"></i> Thêm Địa Chỉ Mới
         </button>
 
@@ -120,9 +120,9 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <?php if ($addresses->num_rows > 0): ?>
                 <?php while ($addr = $addresses->fetch_assoc()): ?>
-                    <div class="bg-white rounded-lg shadow-md p-6 relative <?= $addr['is_default'] ? 'border-2 border-orange-500' : '' ?>">
+                    <div class="bg-white rounded-lg shadow-md p-6 relative <?= $addr['is_default'] ? 'border-2 border-purple-500' : '' ?>">
                         <?php if ($addr['is_default']): ?>
-                            <span class="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">Mặc định</span>
+                            <span class="absolute top-2 right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded">Mặc định</span>
                         <?php endif; ?>
                         
                         <h3 class="font-bold text-lg mb-2"><?= htmlspecialchars($addr['address_name']) ?></h3>
@@ -138,7 +138,7 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
                                     <button type="submit" class="text-blue-600 hover:text-blue-800 text-sm">Đặt mặc định</button>
                                 </form>
                             <?php endif; ?>
-                            <button onclick='editAddress(<?= json_encode($addr) ?>)' class="text-orange-600 hover:text-orange-800 text-sm">Sửa</button>
+                            <button onclick='editAddress(<?= json_encode($addr) ?>)' class="text-purple-600 hover:text-purple-800 text-sm">Sửa</button>
                             <form method="POST" class="inline" onsubmit="return confirm('Xác nhận xóa địa chỉ này?')">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="address_id" value="<?= $addr['id'] ?>">
@@ -167,19 +167,19 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
                 <div class="mb-4">
                     <label class="block text-gray-700 font-semibold mb-2">Tên địa chỉ</label>
                     <input type="text" name="address_name" id="addressName" placeholder="VD: Nhà riêng, Công ty..."
-                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-gray-700 font-semibold mb-2">Người nhận *</label>
                         <input type="text" name="recipient_name" id="recipientName" required
-                               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                     </div>
                     <div>
                         <label class="block text-gray-700 font-semibold mb-2">Số điện thoại *</label>
                         <input type="tel" name="recipient_phone" id="recipientPhone" required
-                               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                     </div>
                 </div>
                 
@@ -187,9 +187,9 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
                     <label class="block text-gray-700 font-semibold mb-2">Tỉnh/Thành phố *</label>
                     <input type="text" name="province" id="province" required list="provinces-list" 
                            placeholder="Nhập hoặc chọn tỉnh/thành phố"
-                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                     <datalist id="provinces-list">
-                        <option value="An Giang"><option value="Bà Rịa - Vũng Tàu"><option value="Bắc Giang"><option value="Bắc Kạn"><option value="Bạc Liêu"><option value="Bắc Ninh"><option value="Bến Tre"><option value="Bình Định"><option value="Bình Dương"><option value="Bình Phước"><option value="Bình Thuận"><option value="Cà Mau"><option value="Cần Thơ"><option value="Cao Bằng"><option value="Đà Nẵng"><option value="Đắk Lắk"><option value="Đắk Nông"><option value="Điện Biên"><option value="Đồng Nai"><option value="Đồng Tháp"><option value="Gia Lai"><option value="Hà Giang"><option value="Hà Nam"><option value="Hà Nội"><option value="Hà Tĩnh"><option value="Hải Dương"><option value="Hải Phòng"><option value="Hậu Giang"><option value="Hòa Bình"><option value="Hưng Yên"><option value="Khánh Hòa"><option value="Kiên Giang"><option value="Kon Tum"><option value="Lai Châu"><option value="Lâm Đồng"><option value="Lạng Sơn"><option value="Lào Cai"><option value="Long An"><option value="Nam Định"><option value="Nghệ An"><option value="Ninh Bình"><option value="Ninh Thuận"><option value="Phú Thọ"><option value="Phú Yên"><option value="Quảng Bình"><option value="Quảng Nam"><option value="Quảng Ngãi"><option value="Quảng Ninh"><option value="Quảng Trị"><option value="Sóc Trăng"><option value="Sơn La"><option value="Tây Ninh"><option value="Thái Bình"><option value="Thái Nguyên"><option value="Thanh Hóa"><option value="Thừa Thiên Huế"><option value="Tiền Giang"><option value="TP. Hồ Chí Minh"><option value="Trà Vinh"><option value="Tuyên Quang"><option value="Vĩnh Long"><option value="Vĩnh Phúc"><option value="Yên Bái">
+                        <!-- Danh sách sẽ được tạo động bằng JavaScript -->
                     </datalist>
                 </div>
                 
@@ -197,7 +197,7 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
                     <label class="block text-gray-700 font-semibold mb-2">Địa chỉ cụ thể *</label>
                     <textarea name="address" id="address" required rows="3"
                               placeholder="Số nhà, tên đường, phường/xã, quận/huyện"
-                              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+                              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
                 </div>
                 
                 <div class="mb-6">
@@ -208,7 +208,7 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
                 </div>
                 
                 <div class="flex gap-4">
-                    <button type="submit" class="flex-1 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700">
+                    <button type="submit" class="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700">
                         Lưu Địa Chỉ
                     </button>
                     <button type="button" onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-400">
@@ -220,6 +220,50 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
     </div>
 
     <script>
+        // Danh sách tỉnh/thành phố
+        const provinces = [
+            "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", 
+            "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", 
+            "Cần Thơ", "Cao Bằng", "Đà Nẵng", "Đắk Lắk", "Đắk Nông", "Điện Biên", 
+            "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Nội", 
+            "Hà Tĩnh", "Hải Dương", "Hải Phòng", "Hậu Giang", "Hòa Bình", "Hưng Yên", 
+            "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn", 
+            "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận", 
+            "Phú Thọ", "Phú Yên", "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", 
+            "Quảng Trị", "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên", 
+            "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "TP. Hồ Chí Minh", "Trà Vinh", 
+            "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái"
+        ];
+
+        // Function để cập nhật datalist với tỉnh đã chọn ở đầu
+        function updateProvincesList(selectedProvince = '') {
+            const datalist = document.getElementById('provinces-list');
+            datalist.innerHTML = '';
+            
+            let sortedProvinces = [...provinces];
+            
+            // Nếu có tỉnh đã chọn, đưa lên đầu
+            if (selectedProvince && provinces.includes(selectedProvince)) {
+                sortedProvinces = sortedProvinces.filter(p => p !== selectedProvince);
+                sortedProvinces.unshift(selectedProvince);
+            }
+            
+            // Tạo options
+            sortedProvinces.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province;
+                datalist.appendChild(option);
+            });
+        }
+
+        // Lắng nghe sự kiện thay đổi tỉnh/thành phố
+        document.getElementById('province').addEventListener('change', function() {
+            const selectedProvince = this.value.trim();
+            if (selectedProvince && provinces.includes(selectedProvince)) {
+                updateProvincesList(selectedProvince);
+            }
+        });
+
         function showAddModal() {
             document.getElementById('modalTitle').textContent = 'Thêm Địa Chỉ Mới';
             document.getElementById('formAction').value = 'add';
@@ -231,6 +275,9 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
             document.getElementById('address').value = '';
             document.getElementById('isDefault').checked = false;
             document.getElementById('addressModal').classList.remove('hidden');
+            
+            // Reset danh sách tỉnh về thứ tự ban đầu
+            updateProvincesList();
         }
 
         function editAddress(addr) {
@@ -244,6 +291,9 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
             document.getElementById('address').value = addr.address;
             document.getElementById('isDefault').checked = addr.is_default == 1;
             document.getElementById('addressModal').classList.remove('hidden');
+            
+            // Cập nhật danh sách tỉnh với tỉnh đã chọn ở đầu
+            updateProvincesList(addr.province);
         }
 
         function closeModal() {
@@ -256,6 +306,9 @@ $addresses = $conn->query("SELECT * FROM saved_addresses WHERE user_id = $user_i
                 closeModal();
             }
         });
+
+        // Khởi tạo danh sách tỉnh ban đầu
+        updateProvincesList();
     </script>
 </body>
 </html>

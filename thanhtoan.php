@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </label>
                         </div>
 
-                        <button type="submit" class="mt-10 w-full bg-orange-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-orange-700 transition duration-150">
+                        <button type="submit" class="mt-10 w-full bg-purple-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-purple-700 transition duration-150">
                             HOÀN TẤT ĐẶT HÀNG (<?= number_format($grand_total) ?> VNĐ)
                         </button>
                     </form>
@@ -190,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
                         <div class="flex justify-between font-bold text-xl pt-4 border-t mt-4">
                             <span>TỔNG CỘNG:</span>
-                            <span class="text-orange-600"><?= number_format($grand_total) ?> VNĐ</span>
+                            <span class="text-purple-600"><?= number_format($grand_total) ?> VNĐ</span>
                         </div>
                     </div>
 

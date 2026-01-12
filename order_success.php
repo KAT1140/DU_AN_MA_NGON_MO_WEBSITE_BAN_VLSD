@@ -90,7 +90,7 @@ $items_stmt->close();
                             <div class="space-y-2">
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Mã đơn hàng:</span>
-                                    <span class="font-bold text-orange-600"><?= htmlspecialchars($order_details['order_code']) ?></span>
+                                    <span class="font-bold text-purple-600"><?= htmlspecialchars($order_details['order_code']) ?></span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Ngày đặt:</span>
@@ -137,7 +137,7 @@ $items_stmt->close();
                     <!-- Order Items -->
                     <div class="bg-gray-50 p-6 rounded-xl mb-6">
                         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <i class="fas fa-box text-orange-600"></i> Chi tiết đơn hàng
+                            <i class="fas fa-box text-purple-600"></i> Chi tiết đơn hàng
                         </h3>
                         <div class="overflow-x-auto">
                             <table class="w-full">
@@ -170,7 +170,7 @@ $items_stmt->close();
                                     </tr>
                                     <tr>
                                         <td colspan="3" class="px-4 py-3 text-right font-bold text-lg">Tổng cộng:</td>
-                                        <td class="px-4 py-3 text-right text-2xl font-black text-orange-600">
+                                        <td class="px-4 py-3 text-right text-2xl font-black text-purple-600">
                                             <?= number_format($order_details['total_amount']) ?>đ
                                         </td>
                                     </tr>
@@ -190,7 +190,7 @@ $items_stmt->close();
                         <div>
                             <p class="text-gray-700 mb-2">Vui lòng chuyển khoản với nội dung:</p>
                             <div class="bg-white p-4 rounded-lg">
-                                <p class="font-bold text-orange-600"><?= $order_details['order_code'] ?></p>
+                                <p class="font-bold text-purple-600"><?= $order_details['order_code'] ?></p>
                             </div>
                         </div>
                         <div>
@@ -224,8 +224,8 @@ $items_stmt->close();
                             <p class="text-gray-600 text-sm">Đơn hàng sẽ được giao trong 2-3 ngày làm việc</p>
                         </div>
                         <div class="bg-white p-4 rounded-xl shadow border">
-                            <div class="w-12 h-12 mx-auto bg-orange-100 rounded-full flex items-center justify-center mb-3">
-                                <i class="fas fa-headset text-orange-600 text-xl"></i>
+                            <div class="w-12 h-12 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                                <i class="fas fa-headset text-purple-600 text-xl"></i>
                             </div>
                             <h4 class="font-bold text-gray-800 mb-2">Hỗ trợ 24/7</h4>
                             <p class="text-gray-600 text-sm">Liên hệ hotline: 1900 1234 nếu cần hỗ trợ</p>
@@ -235,7 +235,7 @@ $items_stmt->close();
 
                 <!-- Action Buttons -->
                 <div class="flex flex-col md:flex-row gap-4 justify-center">
-                    <a href="index.php" class="bg-gradient-to-r from-orange-600 to-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition text-center">
+                    <a href="index.php" class="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition text-center">
                         <i class="fas fa-home"></i> TIẾP TỤC MUA SẮM
                     </a>
                     <a href="profile.php" class="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg transition text-center">

@@ -72,12 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body class="bg-gradient-to-br from-orange-500 to-orange-700 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gradient-to-br from-purple-500 to-purple-700 min-h-screen flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-2xl p-10 max-w-md w-full">
     
     <div class="text-center mb-8"> 
       <a href="index.php" class="inline-block hover:opacity-90 transition mb-3">
-        <img src="uploads/logo.png" alt="VLXD Logo" class="w-20 h-20 rounded-full mx-auto object-cover border-4 border-orange-100">
+        <img src="uploads/logo.png" alt="VLXD Logo" class="w-20 h-20 rounded-full mx-auto object-cover border-4 border-purple-100">
       </a>
       <h1 class="text-3xl font-black text-gray-800">VLXD KAT</h1>
       <p class="text-gray-500 mt-1">Tạo tài khoản thành viên mới</p>
@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           placeholder="Ví dụ: Nguyễn Văn A" 
           value="<?= htmlspecialchars($fullname ?? '') ?>"
           required 
-          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
         >
       </div>
 
@@ -147,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           placeholder="email@example.com" 
           value="<?= htmlspecialchars($email ?? '') ?>"
           required 
-          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
         >
       </div>
 
@@ -158,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           name="phone" 
           placeholder="09xx xxx xxx" 
           value="<?= htmlspecialchars($phone ?? '') ?>"
-          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
         >
       </div>
 
@@ -170,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
               name="password" 
               placeholder="Min 6 ký tự" 
               required 
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
             >
           </div>
 
@@ -181,14 +181,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
               name="password_confirm" 
               placeholder="Xác nhận" 
               required 
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
             >
           </div>
       </div>
 
       <button 
         type="submit" 
-        class="w-full bg-orange-600 text-white py-3 rounded-xl font-bold hover:bg-orange-700 hover:shadow-lg transition duration-200 mt-6"
+        class="w-full bg-purple-600 text-white py-3 rounded-xl font-bold hover:bg-purple-700 hover:shadow-lg transition duration-200 mt-6"
       >
         ĐĂNG KÝ NGAY
       </button>
@@ -197,10 +197,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="text-center mt-6 space-y-3">
       <p class="text-gray-600 text-sm">
         Đã có tài khoản? 
-        <a href="login.php" class="text-orange-600 font-bold hover:underline">Đăng nhập ngay</a>
+        <a href="login.php" class="text-purple-600 font-bold hover:underline">Đăng nhập ngay</a>
       </p>
       
-      <a href="index.php" class="inline-flex items-center text-sm text-gray-500 hover:text-orange-600 font-medium transition">
+      <a href="index.php" class="inline-flex items-center text-sm text-gray-500 hover:text-purple-600 font-medium transition">
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
         Quay lại trang chủ
       </a>

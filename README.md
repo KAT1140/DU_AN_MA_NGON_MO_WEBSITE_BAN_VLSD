@@ -57,17 +57,24 @@ cd DU_AN_MA_NGON_MO_WEBSITE_BAN_VLSD
 ### Frontend Pages
 - `index.php` - Trang chủ, hiển thị sản phẩm nổi bật
 - `products.php` - Trang danh sách sản phẩm với bộ lọc danh mục
+- `product_detail.php` - Chi tiết sản phẩm với đánh giá
 - `cart.php` - Giỏ hàng
 - `checkout.php` - Trang thanh toán với địa chỉ đã lưu
-- `thanhtoan.php` - Trang xác nhận thanh toán
-- `payment_qr.php` - Trang hiển thị mã QR thanh toán (banking/MoMo)
-- `confirm_payment.php` - Xác nhận đã thanh toán
 - `order_success.php` - Trang thành công sau khi đặt hàng
-- `my_orders.php` - Lịch sử đơn hàng
+- `my_orders.php` - Lịch sử đơn hàng, theo dõi, hủy đơn, đánh giá
 - `addresses.php` - Quản lý địa chỉ đã lưu
 - `profile.php` - Trang hồ sơ người dùng
 - `login.php` - Trang đăng nhập (email/password + Google OAuth)
-- `dangki.php` - Trang đăng ký tài khoản (có nhập tên)
+- `dangki.php` - Trang đăng ký tài khoản
+- `forgot_password.php` - Quên mật khẩu
+- `reset_password.php` - Đặt lại mật khẩu
+
+### Payment Pages
+- `banking_payment.php` - Thanh toán chuyển khoản ngân hàng (MB Bank)
+- `momo_qr_display.php` - Thanh toán MoMo (QR code cá nhân)
+- `momo_callback.php` - Xử lý callback từ MoMo
+- `momo_return.php` - Trang quay lại sau thanh toán MoMo
+- `payment_status.php` - Kiểm tra trạng thái thanh toán
 
 ### Backend Processing
 - `config.php` - Cấu hình database & tự động tạo bảng
@@ -78,19 +85,32 @@ cd DU_AN_MA_NGON_MO_WEBSITE_BAN_VLSD
 - `update_cart.php` - Cập nhật số lượng trong giỏ
 - `remove_from_cart.php` - Xóa sản phẩm khỏi giỏ
 - `process_order.php` - Xử lý đơn hàng & routing thanh toán
+- `cancel_order_handler.php` - Xử lý hủy đơn hàng
 - `get_order_details.php` - API lấy chi tiết đơn hàng
 - `get_order_items_for_review.php` - Lấy sản phẩm để đánh giá
 - `submit_review.php` - Xử lý đánh giá sản phẩm
+- `MoMoPaymentHandler.php` - Xử lý thanh toán MoMo
+- `momo_config.php` - Cấu hình MoMo
+- `momo_personal_config.php` - Cấu hình MoMo cá nhân
+- `email_config.php` - Cấu hình email
+
+### Inventory Management
+- `inventory_functions.php` - Các hàm quản lý tồn kho
+- `inventory_management.php` - Trang quản lý tồn kho
+- `inventory_report.php` - Báo cáo tồn kho
+- `inventory_widget.php` - Widget hiển thị tồn kho
+- `product_inventory_detail.php` - Chi tiết tồn kho sản phẩm
 
 ### Admin Pages
-- `admin.php` - Quản lý người dùng (chỉ admin)
-- `admin_products.php` - Quản lý sản phẩm
-- `admin_orders.php` - Quản lý đơn hàng
+- `admin.php` - Dashboard quản trị & quản lý người dùng
+- `admin_products.php` - Quản lý sản phẩm (CRUD)
+- `admin_orders.php` - Quản lý đơn hàng, cập nhật trạng thái
+- `admin_suppliers.php` - Quản lý nhà phân phối
+- `admin_reviews.php` - Quản lý đánh giá sản phẩm
 - `add_product.php` - Thêm sản phẩm mới
 - `add_category.php` - Thêm danh mục
 
 ### Database & Assets
-- `vlxd_store1.sql` - File SQL backup database đầy đủ
 - `setup_saved_addresses.php` - Script tạo bảng địa chỉ đã lưu
 - `uploads/` - Thư mục chứa hình ảnh sản phẩm
 - `assets/css/` - File CSS tùy chỉnh
@@ -153,8 +173,9 @@ vlxd/
 - 🛒 Giỏ hàng với AJAX (không reload trang)
 - � Lưu và chọn địa chỉ giao hàng
 - 💳 Thanh toán: COD, Banking, MoMo
-- 📱 Thanh toán QR code (VietQR, MoMo)
+- 📱 Thanh toán QR code (VietQR API - MoMo & MB Bank cá nhân)
 - 📦 Lịch sử đơn hàng với trạng thái real-time
+- ❌ Hủy đơn hàng với lý do (khi chưa xử lý)
 - ⭐ Đánh giá sản phẩm sau khi nhận hàng
 - 👤 Quản lý hồ sơ cá nhân
 
@@ -171,9 +192,13 @@ vlxd/
 - 👥 Quản lý người dùng (Active/Inactive)
 - 📦 Quản lý sản phẩm (CRUD operations)
 - 🏷️ Quản lý danh mục
-- 🖼️ Upload hình ảnh sản phẩm
+- 🖼️ Upload hình ảnh sản phẩm (JSON format)
 - 📋 Quản lý đơn hàng & cập nhật trạng thái
 - 📊 Xem thống kê tổng quan
+- 🏭 Quản lý nhà cung cấp (click để xem chi tiết)
+- 📦 Hệ thống quản lý kho (inventory tracking)
+- ⭐ Duyệt và quản lý đánh giá sản phẩm
+- 📈 Dashboard thống kê nâng cao
 
 ### Giao diện
 - 📱 Responsive design (Mobile-first)
@@ -192,7 +217,10 @@ vlxd/
 - Chạy trên localhost với XAMPP hoặc PHP built-in server
 - Giao diện sử dụng Tailwind CSS 3.x (CDN)
 - Session được kiểm tra để tránh lỗi "session already started"
-- Payment QR sử dụng VietQR API và Google Charts API
+- Payment QR sử dụng VietQR API (img.vietqr.io)
+- **Thanh toán cá nhân:** MoMo 0379648264, MB Bank 0379648264 (Võ Nhật Duy Nam)
+- Hình ảnh lưu dạng JSON trong database, file thực tế trong thư mục uploads/
+- Hệ thống tự động thêm prefix 'uploads/' nếu thiếu khi hiển thị ảnh
 
 ## �️ Cấu trúc Database
 
@@ -221,6 +249,7 @@ Database tự động được tạo khi chạy lần đầu (xem `config.php`)
 - **orders** - Đơn hàng
   - id, user_id, order_code, total_amount, STATUS, payment_method, payment_status
   - order_status (pending, processing, shipping, delivered, cancelled, awaiting_payment)
+  - cancel_reason (TEXT) - Lý do hủy đơn
   - customer_name, customer_phone, customer_email, shipping_address
   
 - **order_items** - Chi tiết đơn hàng
@@ -242,6 +271,14 @@ Database tự động được tạo khi chạy lần đầu (xem `config.php`)
 
 - **promotions** - Khuyến mãi
   - id, NAME, description, discount_type, discount_value, CODE, usage_limit
+
+- **momo_transactions** - Giao dịch MoMo
+  - id, order_id, transaction_id, request_id, amount, message
+  - qr_code_url, pay_url, deeplink (TEXT)
+  - status (pending, success, failed), created_at, updated_at
+
+- **order_status_logs** - Lịch sử trạng thái đơn hàng
+  - id, order_id, old_status, new_status, changed_by, changed_at, note
 
 ## 🔑 Cấu hình Google OAuth (Tùy chọn)
 
@@ -373,6 +410,17 @@ if (session_status() === PHP_SESSION_NONE) {
 - Users with old passwords need to re-register
 
 ## 🔄 Changelog
+
+### v2.2.0 (2026-01-12)
+- ✅ Chuyển sang thanh toán cá nhân (MoMo: 0379648264, MB Bank: 0379648264)
+- ✅ Tích hợp VietQR API cho QR code thanh toán
+- ✅ Thêm tính năng hủy đơn hàng với lý do
+- ✅ Cải thiện giao diện quản lý nhà cung cấp (click để xem chi tiết)
+- ✅ Fix hiển thị hình ảnh sản phẩm (logic prefix uploads/)
+- ✅ Cập nhật 17 sản phẩm với đường dẫn hình ảnh đúng
+- ✅ Thêm bảng order_status_logs để theo dõi lịch sử đơn hàng
+- ✅ Thêm các cột qr_code_url, pay_url, deeplink vào momo_transactions
+- ✅ Hệ thống inventory management nâng cao
 
 ### v2.1.0 (2025-12-23)
 - ✅ Thêm thanh toán QR code (Banking & MoMo)

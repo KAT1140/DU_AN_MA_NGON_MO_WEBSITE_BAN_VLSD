@@ -1,5 +1,6 @@
 <?php
 require 'config.php';
+require 'inventory_functions.php';
 
 // Chỉ cho phép user đã đăng nhập
 if (!isset($_SESSION['logged_in'])) {
@@ -13,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $user_id = $_SESSION['user_id'];
+$cart_session = session_id(); // Thêm dòng này
 
 // Lấy dữ liệu từ form
 $customer_name = trim($_POST['customer_name'] ?? '');
@@ -49,13 +51,18 @@ if ($cart_result->num_rows === 0) {
     $errors[] = 'Giỏ hàng trống';
 }
 
-// Kiểm tra tồn kho
+// Kiểm tra tồn kho bằng hệ thống inventory
 $cart_items = [];
+$cart_products_for_check = [];
 while ($item = $cart_result->fetch_assoc()) {
-    if ($item['quantity'] > $item['stock']) {
-        $errors[] = "Sản phẩm '{$item['product_name']}' chỉ còn {$item['stock']} sản phẩm trong kho";
-    }
     $cart_items[] = $item;
+    $cart_products_for_check[$item['product_id']] = $item['quantity'];
+}
+
+// Sử dụng hàm kiểm tra inventory
+$inventory_check = checkInventoryAvailability($conn, $cart_products_for_check);
+if (!$inventory_check['success']) {
+    $errors[] = $inventory_check['message'];
 }
 
 if (!empty($errors)) {
@@ -108,40 +115,111 @@ try {
         if (!$order_item_stmt->execute()) {
             throw new Exception('Lỗi khi thêm sản phẩm vào đơn hàng: ' . $order_item_stmt->error);
         }
-        
-        // Cập nhật số lượng tồn kho
-        $update_sql = "UPDATE products SET quantity = quantity - ? WHERE id = ?";
-        $update_stmt = $conn->prepare($update_sql);
-        $update_stmt->bind_param('ii', $item['quantity'], $item['product_id']);
-        $update_stmt->execute();
-        $update_stmt->close();
     }
     
     $order_item_stmt->close();
     
-    // Xóa giỏ hàng
-    $delete_cart_sql = "DELETE c FROM cart c 
-                        LEFT JOIN cart_items ci ON ci.cart_id = c.id 
-                        WHERE c.session_id = ? OR (c.user_id = ? AND c.user_id != 0)";
-    $delete_stmt = $conn->prepare($delete_cart_sql);
-    $delete_stmt->bind_param('si', $cart_session, $user_id);
-    $delete_stmt->execute();
-    $delete_stmt->close();
+    // Cập nhật inventory cho đơn hàng
+    if (!updateInventoryForOrder($conn, $order_id, $user_id)) {
+        throw new Exception('Lỗi cập nhật inventory');
+    }
     
-    // Commit transaction
-    $conn->commit();
-    
-    // Lưu thông tin đơn hàng vào session để hiển thị ở trang thành công
-    $_SESSION['last_order'] = [
-        'order_code' => $order_code,
-        'order_id' => $order_id,
-        'customer_name' => $customer_name,
-        'total' => $total
-    ];
-    
-    // Chuyển đến trang thành công
-    header('Location: order_success.php');
-    exit();
+    // Xử lý theo phương thức thanh toán
+    if ($payment_method === 'momo' || $payment_method === 'momo_qr') {
+        // Debug log
+        error_log("Processing MoMo payment for order_id: " . $order_id . ", amount: " . $total);
+        
+        // Thanh toán MoMo - không xóa giỏ hàng và không xác nhận đơn hàng ngay
+        // Đơn hàng sẽ được xác nhận sau khi nhận callback từ MoMo
+        
+        // Commit transaction để lưu đơn hàng
+        $conn->commit();
+        
+        // Tạo thanh toán MoMo
+        require_once 'MoMoPaymentHandler.php';
+        $momoHandler = new MoMoPaymentHandler($conn);
+        
+        $orderInfo = "Thanh toán đơn hàng " . $order_code . " - VLXD Store";
+        $momoResult = $momoHandler->createPayment($order_id, $total, $orderInfo);
+        
+        error_log("MoMo payment result: " . json_encode($momoResult));
+        
+        if ($momoResult['success']) {
+            // Chuyển đến trang hiển thị QR
+            $redirectUrl = 'momo_qr_display.php?request_id=' . urlencode($momoResult['request_id']) . 
+                          '&order_id=' . urlencode($order_id);
+            error_log("Redirecting to: " . $redirectUrl);
+            header('Location: ' . $redirectUrl);
+            exit();
+        } else {
+            // Lỗi tạo thanh toán MoMo - rollback và thông báo lỗi
+            error_log("MoMo payment creation failed: " . $momoResult['error']);
+            
+            $conn->begin_transaction();
+            
+            // Hoàn lại inventory
+            if (!restoreInventoryForCancelledOrder($conn, $order_id, $user_id)) {
+                error_log("Failed to restore inventory for cancelled order: " . $order_id);
+            }
+            
+            // Xóa đơn hàng đã tạo
+            $delete_order_sql = "DELETE FROM orders WHERE id = ?";
+            $delete_order_stmt = $conn->prepare($delete_order_sql);
+            $delete_order_stmt->bind_param('i', $order_id);
+            $delete_order_stmt->execute();
+            $delete_order_stmt->close();
+            
+            $conn->commit();
+            
+            $_SESSION['checkout_errors'] = ['Không thể tạo thanh toán MoMo: ' . $momoResult['error']];
+            header('Location: checkout.php');
+            exit();
+        }
+    } elseif ($payment_method === 'banking') {
+        // Thanh toán chuyển khoản ngân hàng
+        
+        // Commit transaction để lưu đơn hàng
+        $conn->commit();
+        
+        // Lưu thông tin đơn hàng vào session
+        $_SESSION['last_order'] = [
+            'order_code' => $order_code,
+            'order_id' => $order_id,
+            'customer_name' => $customer_name,
+            'total' => $total,
+            'payment_method' => 'banking'
+        ];
+        
+        // Chuyển đến trang hiển thị thông tin chuyển khoản
+        header('Location: banking_payment.php?order_id=' . $order_id);
+        exit();
+    } else {
+        // Thanh toán COD hoặc Banking - xử lý như cũ
+        
+        // Xóa giỏ hàng
+        $delete_cart_sql = "DELETE c FROM cart c 
+                            LEFT JOIN cart_items ci ON ci.cart_id = c.id 
+                            WHERE c.session_id = ? OR (c.user_id = ? AND c.user_id != 0)";
+        $delete_stmt = $conn->prepare($delete_cart_sql);
+        $delete_stmt->bind_param('si', $cart_session, $user_id);
+        $delete_stmt->execute();
+        $delete_stmt->close();
+        
+        // Commit transaction
+        $conn->commit();
+        
+        // Lưu thông tin đơn hàng vào session để hiển thị ở trang thành công
+        $_SESSION['last_order'] = [
+            'order_code' => $order_code,
+            'order_id' => $order_id,
+            'customer_name' => $customer_name,
+            'total' => $total
+        ];
+        
+        // Chuyển đến trang thành công
+        header('Location: order_success.php');
+        exit();
+    }
     
 } catch (Exception $e) {
     // Rollback nếu có lỗi

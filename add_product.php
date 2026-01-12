@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="bg-gray-50 min-h-screen">
   <div class="max-w-xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-xl">
-    <h1 class="text-3xl font-black text-orange-600 mb-6">➕ Thêm sản phẩm mới</h1>
+    <h1 class="text-3xl font-black text-purple-600 mb-6">➕ Thêm sản phẩm mới</h1>
 
     <?php if ($require_admin_note): ?>
       <div class="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700"><?= $require_admin_note ?></div>
@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="file" name="image" accept="image/*" class="w-full">
       </div>
 
-      <button type="submit" class="w-full bg-orange-600 text-white py-3 rounded-xl font-bold hover:bg-orange-700">Thêm sản phẩm</button>
+      <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-xl font-bold hover:bg-purple-700">Thêm sản phẩm</button>
     </form>
   </div>
 </body>

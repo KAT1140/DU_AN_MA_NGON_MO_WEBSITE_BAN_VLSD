@@ -90,19 +90,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'delete_order') {
         $order_id = (int)$_POST['order_id'];
         
-        // Xóa order_items trước
-        $conn->query("DELETE FROM order_items WHERE order_id = $order_id");
+        // Bắt đầu transaction để đảm bảo tính toàn vẹn dữ liệu
+        $conn->begin_transaction();
         
-        // Xóa order
-        $stmt = $conn->prepare("DELETE FROM orders WHERE id = ?");
-        $stmt->bind_param('i', $order_id);
-        
-        if ($stmt->execute()) {
-            $msg = "✅ Đã xóa đơn hàng thành công!";
-        } else {
-            $error = "❌ Lỗi: " . $stmt->error;
+        try {
+            // Hoàn lại số lượng tồn kho trước khi xóa
+            $restore_sql = "UPDATE products p 
+                           JOIN order_items oi ON p.id = oi.product_id 
+                           SET p.quantity = p.quantity + oi.quantity 
+                           WHERE oi.order_id = ?";
+            $restore_stmt = $conn->prepare($restore_sql);
+            $restore_stmt->bind_param('i', $order_id);
+            $restore_stmt->execute();
+            $restore_stmt->close();
+            
+            // Xóa order_items
+            $delete_items_stmt = $conn->prepare("DELETE FROM order_items WHERE order_id = ?");
+            $delete_items_stmt->bind_param('i', $order_id);
+            $delete_items_stmt->execute();
+            $delete_items_stmt->close();
+            
+            // Xóa order
+            $delete_order_stmt = $conn->prepare("DELETE FROM orders WHERE id = ?");
+            $delete_order_stmt->bind_param('i', $order_id);
+            $delete_order_stmt->execute();
+            $delete_order_stmt->close();
+            
+            // Commit transaction
+            $conn->commit();
+            $msg = "✅ Đã xóa đơn hàng và hoàn trả số lượng vào kho thành công!";
+            
+        } catch (Exception $e) {
+            // Rollback nếu có lỗi
+            $conn->rollback();
+            $error = "❌ Lỗi khi xóa đơn hàng: " . $e->getMessage();
         }
-        $stmt->close();
     }
 }
 
@@ -195,11 +217,24 @@ if (!empty($params)) {
     <title>Quản lý Đơn hàng - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .clickable-row {
+            transition: all 0.2s ease;
+        }
+        .clickable-row:hover {
+            background-color: #f8fafc !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .clickable-row:active {
+            transform: translateY(0);
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
     
     <!-- Header -->
-    <nav class="bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg">
+    <nav class="bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-lg">
         <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -207,13 +242,13 @@ if (!empty($params)) {
                         <i class="fas fa-tools"></i> VLXD Admin
                     </a>
                     <div class="hidden md:flex gap-2">
-                        <a href="admin.php" class="px-4 py-2 rounded hover:bg-orange-700 transition">
+                        <a href="admin.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
                             <i class="fas fa-users"></i> Người dùng
                         </a>
-                        <a href="admin_products.php" class="px-4 py-2 rounded hover:bg-orange-700 transition">
+                        <a href="admin_products.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
                             <i class="fas fa-box"></i> Sản phẩm
                         </a>
-                        <a href="admin_orders.php" class="px-4 py-2 rounded bg-orange-700 relative">
+                        <a href="admin_orders.php" class="px-4 py-2 rounded bg-purple-700 relative">
                             <i class="fas fa-shopping-cart"></i> Đơn hàng
                             <?php if ($pending_orders > 0): ?>
                                 <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
@@ -225,7 +260,7 @@ if (!empty($params)) {
                 </div>
                 <div class="flex items-center gap-4">
                     <span class="hidden md:inline"><?= htmlspecialchars($_SESSION['user_name']) ?></span>
-                    <a href="index.php" class="px-4 py-2 rounded hover:bg-orange-700 transition">
+                    <a href="index.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
                         <i class="fas fa-home"></i> Trang chủ
                     </a>
                     <a href="logout.php" class="px-4 py-2 bg-red-600 rounded hover:bg-red-700 transition">
@@ -305,10 +340,10 @@ if (!empty($params)) {
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm">Doanh thu</p>
-                        <p class="text-xl font-bold text-orange-600"><?= number_format($total_revenue) ?>₫</p>
+                        <p class="text-xl font-bold text-purple-600"><?= number_format($total_revenue) ?>₫</p>
                     </div>
-                    <div class="bg-orange-100 p-3 rounded-full">
-                        <i class="fas fa-dollar-sign text-orange-600 text-xl"></i>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-dollar-sign text-purple-600 text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -321,12 +356,12 @@ if (!empty($params)) {
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tìm kiếm</label>
                     <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" 
                            placeholder="Mã đơn, tên, SĐT..."
-                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái đơn</label>
-                    <select name="status" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <select name="status" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="">Tất cả</option>
                         <option value="pending" <?= $status_filter === 'pending' ? 'selected' : '' ?>>Chờ xử lý</option>
                         <option value="processing" <?= $status_filter === 'processing' ? 'selected' : '' ?>>Đang xử lý</option>
@@ -338,7 +373,7 @@ if (!empty($params)) {
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Thanh toán</label>
-                    <select name="payment" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <select name="payment" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="">Tất cả</option>
                         <option value="pending" <?= $payment_filter === 'pending' ? 'selected' : '' ?>>Chờ thanh toán</option>
                         <option value="paid" <?= $payment_filter === 'paid' ? 'selected' : '' ?>>Đã thanh toán</option>
@@ -347,7 +382,7 @@ if (!empty($params)) {
                 </div>
                 
                 <div class="flex items-end gap-2">
-                    <button type="submit" class="flex-1 bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition">
+                    <button type="submit" class="flex-1 bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">
                         <i class="fas fa-search"></i> Lọc
                     </button>
                     <a href="admin_orders.php" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition">
@@ -380,7 +415,7 @@ if (!empty($params)) {
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php if ($orders->num_rows === 0): ?>
                             <tr>
-                                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
                                     <i class="fas fa-inbox text-4xl mb-2"></i>
                                     <p>Chưa có đơn hàng nào</p>
                                 </td>
@@ -417,9 +452,9 @@ if (!empty($params)) {
                                     'failed' => 'Thất bại'
                                 ];
                                 ?>
-                                <tr class="hover:bg-gray-100 cursor-pointer transition" onclick="viewOrder(<?= $order['id'] ?>)">
+                                <tr class="clickable-row cursor-pointer" onclick="viewOrder(<?= $order['id'] ?>)">
                                     <td class="px-6 py-4">
-                                        <span class="text-orange-600 font-semibold">
+                                        <span class="text-purple-600 font-semibold">
                                             <?= htmlspecialchars($order['order_code']) ?>
                                         </span>
                                     </td>
@@ -429,7 +464,7 @@ if (!empty($params)) {
                                             <div class="text-gray-500"><?= htmlspecialchars($order['customer_phone']) ?></div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 font-semibold text-orange-600">
+                                    <td class="px-6 py-4 font-semibold text-purple-600">
                                         <?= number_format($order['total_amount']) ?>₫
                                     </td>
                                     <td class="px-6 py-4">
@@ -469,7 +504,7 @@ if (!empty($params)) {
                             
                             <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
                                 <a href="?page=<?= $i ?>&search=<?= urlencode($search) ?>&status=<?= urlencode($status_filter) ?>&payment=<?= urlencode($payment_filter) ?>" 
-                                   class="px-4 py-2 <?= $i === $page ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' ?> rounded transition">
+                                   class="px-4 py-2 <?= $i === $page ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' ?> rounded transition">
                                     <?= $i ?>
                                 </a>
                             <?php endfor; ?>
@@ -519,7 +554,7 @@ if (!empty($params)) {
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái đơn hàng</label>
                     <select name="order_status" id="edit_order_status" required
-                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="pending">Chờ xử lý</option>
                         <option value="processing">Đang xử lý</option>
                         <option value="shipped">Đang giao hàng</option>
@@ -531,7 +566,7 @@ if (!empty($params)) {
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái thanh toán</label>
                     <select name="payment_status" id="edit_payment_status" required
-                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                         <option value="pending">Chờ thanh toán</option>
                         <option value="paid">Đã thanh toán</option>
                         <option value="failed">Thất bại</option>
@@ -539,7 +574,7 @@ if (!empty($params)) {
                 </div>
                 
                 <div class="flex gap-2">
-                    <button type="submit" class="flex-1 bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition">
+                    <button type="submit" class="flex-1 bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">
                         <i class="fas fa-save"></i> Cập nhật
                     </button>
                     <button type="button" onclick="closeEditModal()" class="flex-1 bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition">
@@ -577,7 +612,7 @@ if (!empty($params)) {
     <script>
         function viewOrder(orderId) {
             document.getElementById('viewOrderModal').classList.remove('hidden');
-            document.getElementById('orderDetails').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-4xl text-orange-600"></i></div>';
+            document.getElementById('orderDetails').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-4xl text-purple-600"></i></div>';
             
             // Load chi tiết đơn hàng qua AJAX
             fetch('get_order_details.php?id=' + orderId)
@@ -615,7 +650,7 @@ if (!empty($params)) {
                     <div>
                         <h4 class="font-bold text-gray-800 mb-3">Thông tin đơn hàng</h4>
                         <div class="space-y-2 text-sm">
-                            <p><span class="font-medium">Mã đơn:</span> <span class="text-orange-600 font-bold">${order.order_code}</span></p>
+                            <p><span class="font-medium">Mã đơn:</span> <span class="text-purple-600 font-bold">${order.order_code}</span></p>
                             <p><span class="font-medium">Ngày đặt:</span> ${new Date(order.created_at).toLocaleString('vi-VN')}</p>
                             <p><span class="font-medium">Trạng thái:</span> <span class="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">${statusLabels[order.order_status] || order.order_status}</span></p>
                             <p><span class="font-medium">Thanh toán:</span> ${paymentLabels[order.payment_method] || order.payment_method}</p>
@@ -677,7 +712,7 @@ if (!empty($params)) {
                             </div>
                             <div class="flex justify-between font-bold text-lg border-t pt-2">
                                 <span>Tổng cộng:</span>
-                                <span class="text-orange-600">${parseInt(order.total_amount).toLocaleString('vi-VN')}₫</span>
+                                <span class="text-purple-600">${parseInt(order.total_amount).toLocaleString('vi-VN')}₫</span>
                             </div>
                         </div>
                     </div>
@@ -788,7 +823,12 @@ if (!empty($params)) {
         }
         
         function deleteOrder(orderId, orderCode) {
-            if (confirm('Bạn có chắc muốn xóa đơn hàng "' + orderCode + '"?\n\nThao tác này không thể hoàn tác!')) {
+            const confirmMessage = `Bạn có chắc muốn xóa đơn hàng "${orderCode}"?\n\n` +
+                                 `⚠️ Lưu ý:\n` +
+                                 `• Thao tác này không thể hoàn tác!\n\n` +
+                                 `Nhấn OK để xác nhận xóa đơn hàng.`;
+            
+            if (confirm(confirmMessage)) {
                 document.getElementById('delete_order_id').value = orderId;
                 document.getElementById('deleteForm').submit();
             }
@@ -822,6 +862,111 @@ if (!empty($params)) {
         
         document.getElementById('editOrderModal').addEventListener('click', function(e) {
             if (e.target === this) closeEditModal();
+        });
+    </script>
+
+    <!-- Cancel Order Modal -->
+    <div id="cancelModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-red-600">
+                        <i class="fas fa-exclamation-triangle"></i> Hủy đơn hàng
+                    </h3>
+                    <button onclick="closeCancelModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-gray-700 mb-3">Bạn có chắc chắn muốn hủy đơn hàng này?</p>
+                    <p class="text-sm text-purple-600 mb-3">
+                        <i class="fas fa-info-circle"></i> 
+                        Số lượng sản phẩm sẽ được hoàn trả vào kho tự động.
+                    </p>
+                    
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Lý do hủy đơn:</label>
+                    <textarea id="cancelReason" rows="3" 
+                              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                              placeholder="Nhập lý do hủy đơn hàng..."></textarea>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button onclick="confirmCancelOrder()" 
+                            class="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+                        <i class="fas fa-times-circle"></i> Xác nhận hủy
+                    </button>
+                    <button onclick="closeCancelModal()" 
+                            class="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cancelOrderId = null;
+
+        function showCancelModal(orderId) {
+            cancelOrderId = orderId;
+            document.getElementById('cancelModal').classList.remove('hidden');
+            document.getElementById('cancelReason').value = '';
+            document.getElementById('cancelReason').focus();
+        }
+
+        function closeCancelModal() {
+            document.getElementById('cancelModal').classList.add('hidden');
+            cancelOrderId = null;
+        }
+
+        function confirmCancelOrder() {
+            if (!cancelOrderId) return;
+            
+            const reason = document.getElementById('cancelReason').value.trim();
+            if (!reason) {
+                alert('Vui lòng nhập lý do hủy đơn hàng');
+                return;
+            }
+            
+            // Disable button to prevent double click
+            const confirmBtn = event.target;
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            
+            fetch('cancel_order_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    order_id: cancelOrderId,
+                    cancel_reason: reason
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    location.reload(); // Reload page to show updated status
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('❌ Có lỗi xảy ra khi hủy đơn hàng');
+            })
+            .finally(() => {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-times-circle"></i> Xác nhận hủy';
+                closeCancelModal();
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('cancelModal').addEventListener('click', function(e) {
+            if (e.target === this) closeCancelModal();
         });
     </script>
 

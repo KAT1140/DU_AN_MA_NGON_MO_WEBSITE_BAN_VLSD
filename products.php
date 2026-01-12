@@ -40,7 +40,7 @@ header('Content-Type: text/html; charset=utf-8');
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <header class="bg-gradient-to-r from-orange-500 to-amber-500 text-white sticky top-0 z-50 shadow-xl">
+  <header class="bg-gradient-to-r from-purple-500 to-blue-500 text-white sticky top-0 z-50 shadow-xl">
     <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
       <a href="index.php" class="flex items-center gap-4 hover:opacity-90 transition">
         <img src="uploads/logo.png" alt="VLXD Logo" class="w-16 h-16 object-cover rounded-full">
@@ -48,10 +48,10 @@ header('Content-Type: text/html; charset=utf-8');
       </a>
       <div class="flex items-center gap-8">
         <nav class="flex items-center gap-6">
-          <a href="index.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2">
+          <a href="index.php" class="text-white font-bold hover:text-purple-200 transition text-lg flex items-center gap-2">
             <i class="fas fa-home"></i> Trang chủ
           </a>
-          <a href="products.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2 underline">
+          <a href="products.php" class="text-white font-bold hover:text-purple-200 transition text-lg flex items-center gap-2 underline">
             <i class="fas fa-box"></i> Sản phẩm
           </a>
         </nav>
@@ -60,11 +60,11 @@ header('Content-Type: text/html; charset=utf-8');
           <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
             <div class="flex items-center gap-3">
               <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-                <a href="admin.php" class="bg-yellow-400 text-orange-900 px-4 py-2 rounded-full font-bold hover:bg-yellow-300 transition flex items-center gap-2 shadow-lg text-sm">
+                <a href="admin.php" class="bg-yellow-400 text-purple-900 px-4 py-2 rounded-full font-bold hover:bg-yellow-300 transition flex items-center gap-2 shadow-lg text-sm">
                   <i class="fas fa-user-shield"></i> Quản trị
                 </a>
               <?php endif; ?>
-              <a href="profile.php" class="text-white font-bold hover:text-orange-200 transition text-lg">
+              <a href="profile.php" class="text-white font-bold hover:text-purple-200 transition text-lg">
                 👤 <?= htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['user_email']) ?>
               </a>
               <a href="logout.php" class="bg-red-600 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition">
@@ -72,10 +72,10 @@ header('Content-Type: text/html; charset=utf-8');
               </a>
             </div>
           <?php else: ?>
-            <a href="login.php" class="bg-white text-orange-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition">
+            <a href="login.php" class="bg-white text-purple-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition">
               Đăng nhập
             </a>
-            <a href="dangki.php" class="border-2 border-white text-white px-6 py-3 rounded-full font-bold hover:bg-orange-400 transition">
+            <a href="dangki.php" class="border-2 border-white text-white px-6 py-3 rounded-full font-bold hover:bg-purple-400 transition">
               Đăng ký
             </a>
           <?php endif; ?>
@@ -88,7 +88,7 @@ header('Content-Type: text/html; charset=utf-8');
           $res = $conn->query("SELECT SUM(ci.quantity) AS total_qty FROM cart c JOIN cart_items ci ON ci.cart_id = c.id WHERE c.session_id = '$sid'");
           $count = ($res && $row = $res->fetch_assoc()) ? ($row['total_qty'] ?? 0) : 0;
           $hiddenClass = ($count > 0) ? '' : 'hidden';
-          echo "<span id='cart-count' class='absolute -top-2 -right-2 bg-white text-orange-600 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md $hiddenClass'>{$count}</span>";
+          echo "<span id='cart-count' class='absolute -top-2 -right-2 bg-white text-purple-600 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md $hiddenClass'>{$count}</span>";
           ?>
         </a>
       </div>
@@ -150,7 +150,7 @@ header('Content-Type: text/html; charset=utf-8');
 
        <div class="mb-6 flex justify-between items-center">
           <h2 class="text-2xl font-bold text-gray-800"><?= $title ?></h2>
-          <span class="bg-orange-50 text-orange-600 px-3 py-1 rounded-lg text-sm font-semibold">
+          <span class="bg-purple-50 text-purple-600 px-3 py-1 rounded-lg text-sm font-semibold">
             <i class="fas fa-cube"></i> <?= $total_products ?> sản phẩm
           </span>
         </div>
@@ -163,7 +163,16 @@ header('Content-Type: text/html; charset=utf-8');
          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <?php while ($product = $result->fetch_assoc()): 
                 $images = json_decode($product['images'], true);
-                $image_url = !empty($images) ? $images[0] : 'https://via.placeholder.com/300x300?text=No+Image';
+                $image_url = 'https://via.placeholder.com/300x300?text=No+Image';
+                if (!empty($images)) {
+                    // Kiểm tra xem đường dẫn đã có 'uploads/' chưa
+                    $first_image = $images[0];
+                    if (strpos($first_image, 'uploads/') === 0) {
+                        $image_url = $first_image;
+                    } else {
+                        $image_url = 'uploads/' . $first_image;
+                    }
+                }
                 $price = $product['sale_price'] > 0 ? $product['sale_price'] : $product['price'];
             ?>
               <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition overflow-hidden group flex flex-col h-full">
@@ -179,7 +188,7 @@ header('Content-Type: text/html; charset=utf-8');
                 <div class="p-4 flex-grow">
                   <h3 class="font-bold text-gray-800 mb-2 line-clamp-2"><?= htmlspecialchars($product['NAME']) ?></h3>
                   <div class="flex items-center gap-2 mb-3">
-                    <span class="text-xl font-bold text-orange-500"><?= number_format($price, 0, ',', '.') ?>đ</span>
+                    <span class="text-xl font-bold text-purple-500"><?= number_format($price, 0, ',', '.') ?>đ</span>
                     <?php if($product['sale_price'] > 0 && $product['sale_price'] < $product['price']): ?>
                         <span class="text-sm text-gray-400 line-through"><?= number_format($product['price'], 0, ',', '.') ?>đ</span>
                     <?php endif; ?>
@@ -190,17 +199,108 @@ header('Content-Type: text/html; charset=utf-8');
                    <form action="add_to_cart.php" method="POST" class="flex-1 add-to-cart-form">
                         <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                         <input type="hidden" name="quantity" value="1">
-                        <button type="submit" class="w-full bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition flex items-center justify-center gap-2">
+                        <button type="submit" class="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition flex items-center justify-center gap-2">
                           <i class="fas fa-shopping-cart"></i> Thêm
                         </button>
                    </form>
-                   <a href="#" class="border border-orange-500 text-orange-500 px-4 py-2 rounded hover:bg-orange-50 transition flex items-center gap-2">
+                   <a href="#" class="border border-purple-500 text-purple-500 px-4 py-2 rounded hover:bg-purple-50 transition flex items-center gap-2">
                       <i class="fas fa-eye"></i> Xem
                    </a>
                 </div>
               </div>
             <?php endwhile; ?>
           </div>
+
+          <?php
+          // Hiển thị sản phẩm gợi ý liên quan
+          $related_products = [];
+          $related_title = '';
+          
+          if (isset($_GET['category_id'])) {
+              $current_cat_id = intval($_GET['category_id']);
+              
+              // Định nghĩa các danh mục liên quan
+              $related_categories = [
+                  2 => [4, 'Sơn - Phụ phẩm kèm'], // Gạch -> Sơn
+                  1 => [2, 'Gạch'],               // Xi măng -> Gạch
+                  4 => [2, 'Gạch'],               // Sơn -> Gạch
+                  3 => [1, 'Xi măng'],             // Thép -> Xi măng
+                  5 => [3, 'Thép'],               // Tôn-Ngói -> Thép
+              ];
+              
+              if (isset($related_categories[$current_cat_id])) {
+                  $related_cat_id = $related_categories[$current_cat_id][0];
+                  $related_title = $related_categories[$current_cat_id][1];
+                  
+                  $related_query = "SELECT * FROM products WHERE STATUS='active' AND category_id = $related_cat_id ORDER BY RAND() LIMIT 6";
+                  $related_result = $conn->query($related_query);
+                  
+                  if ($related_result && $related_result->num_rows > 0) {
+                      while ($related_product = $related_result->fetch_assoc()) {
+                          $related_products[] = $related_product;
+                      }
+                  }
+              }
+          }
+          ?>
+
+          <?php if (!empty($related_products)): ?>
+          <div class="mt-12 border-t pt-8">
+              <div class="mb-6 flex items-center gap-3">
+                  <h3 class="text-2xl font-bold text-gray-800">
+                      <i class="fas fa-lightbulb text-yellow-500"></i> Sản phẩm liên quan - <?= htmlspecialchars($related_title) ?>
+                  </h3>
+                  <span class="bg-yellow-50 text-yellow-600 px-3 py-1 rounded-lg text-sm font-semibold">
+                      Gợi ý cho bạn
+                  </span>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <?php foreach ($related_products as $related): 
+                      $related_images = json_decode($related['images'], true);
+                      $related_image_url = !empty($related_images) ? $related_images[0] : 'https://via.placeholder.com/300x300?text=No+Image';
+                      $related_price = $related['sale_price'] > 0 ? $related['sale_price'] : $related['price'];
+                  ?>
+                      <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg shadow-md hover:shadow-xl transition overflow-hidden group flex flex-col h-full border-2 border-yellow-200">
+                          <div class="relative h-48 bg-gray-100">
+                              <img src="<?= htmlspecialchars($related_image_url) ?>" class="w-full h-full object-cover">
+                              <span class="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-bold">
+                                  <i class="fas fa-star"></i> Gợi ý
+                              </span>
+                              <?php if ($related['quantity'] > 0): ?>
+                                  <span class="absolute bottom-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs"><i class="fas fa-check"></i> Còn hàng</span>
+                              <?php else: ?>
+                                  <span class="absolute bottom-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs">Hết hàng</span>
+                              <?php endif; ?>
+                          </div>
+
+                          <div class="p-4 flex-grow">
+                              <h4 class="font-bold text-gray-800 mb-2 line-clamp-2"><?= htmlspecialchars($related['NAME']) ?></h4>
+                              <div class="flex items-center gap-2 mb-3">
+                                  <span class="text-xl font-bold text-purple-500"><?= number_format($related_price, 0, ',', '.') ?>đ</span>
+                                  <?php if($related['sale_price'] > 0 && $related['sale_price'] < $related['price']): ?>
+                                      <span class="text-sm text-gray-400 line-through"><?= number_format($related['price'], 0, ',', '.') ?>đ</span>
+                                  <?php endif; ?>
+                              </div>
+                          </div>
+
+                          <div class="p-4 pt-0 mt-auto flex gap-2">
+                              <form action="add_to_cart.php" method="POST" class="flex-1 add-to-cart-form">
+                                  <input type="hidden" name="product_id" value="<?= $related['id'] ?>">
+                                  <input type="hidden" name="quantity" value="1">
+                                  <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded hover:from-purple-600 hover:to-blue-600 transition flex items-center justify-center gap-2">
+                                      <i class="fas fa-shopping-cart"></i> Thêm
+                                  </button>
+                              </form>
+                              <a href="#" class="border border-yellow-500 text-yellow-600 px-4 py-2 rounded hover:bg-yellow-50 transition flex items-center gap-2">
+                                  <i class="fas fa-eye"></i> Xem
+                              </a>
+                          </div>
+                      </div>
+                  <?php endforeach; ?>
+              </div>
+          </div>
+          <?php endif; ?>
 
          <?php if ($total_pages > 1): ?>
             <div class="flex justify-center gap-2 mt-8">

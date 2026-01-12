@@ -26,19 +26,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         
         if ($result->num_rows > 0) {
             $order = $result->fetch_assoc();
-            // Cho phép hủy đơn đang chờ xử lý hoặc đang xử lý
+            // Cho phép hủy đơn đang chờ xử lý hoặc đang xử lý (chưa giao hàng)
             if (in_array($order['order_status'], ['pending', 'processing'])) {
-                $stmt = $conn->prepare("UPDATE orders SET order_status = 'cancelled' WHERE id = ? AND user_id = ?");
-                $stmt->bind_param('ii', $order_id, $user_id);
+                // Thêm lý do hủy và thời gian hủy
+                $cancel_reason = "Khách hàng hủy đơn";
+                $stmt = $conn->prepare("UPDATE orders SET order_status = 'cancelled', cancel_reason = ?, cancelled_at = NOW() WHERE id = ? AND user_id = ?");
+                $stmt->bind_param('sii', $cancel_reason, $order_id, $user_id);
                 
                 if ($stmt->execute()) {
-                    $msg = "✅ Đã hủy đơn hàng thành công!";
+                    // Hoàn lại số lượng tồn kho
+                    $restore_sql = "UPDATE products p 
+                                   JOIN order_items oi ON p.id = oi.product_id 
+                                   SET p.quantity = p.quantity + oi.quantity 
+                                   WHERE oi.order_id = ?";
+                    $restore_stmt = $conn->prepare($restore_sql);
+                    $restore_stmt->bind_param('i', $order_id);
+                    $restore_stmt->execute();
+                    $restore_stmt->close();
+                    
+                    $msg = "✅ Đã hủy đơn hàng thành công! Số lượng sản phẩm đã được hoàn lại kho.";
                 } else {
                     $error = "❌ Lỗi khi hủy đơn hàng: " . $stmt->error;
                 }
                 $stmt->close();
             } else {
-                $error = "❌ Không thể hủy đơn hàng đã giao hoặc đang giao!";
+                $status_text = [
+                    'shipped' => 'đang giao hàng',
+                    'delivered' => 'đã giao hàng',
+                    'cancelled' => 'đã bị hủy'
+                ];
+                $current_status = $status_text[$order['order_status']] ?? $order['order_status'];
+                $error = "❌ Không thể hủy đơn hàng {$current_status}!";
             }
         } else {
             $error = "❌ Không tìm thấy đơn hàng!";
@@ -90,7 +108,7 @@ $stats = [
 <body class="bg-gray-50">
 
     <!-- Header -->
-    <nav class="bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg">
+    <nav class="bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-lg">
         <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -100,13 +118,13 @@ $stats = [
                     <span class="text-sm opacity-80">Đơn hàng của tôi</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <a href="index.php" class="px-4 py-2 rounded hover:bg-orange-700 transition">
+                    <a href="index.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
                         <i class="fas fa-home"></i> Trang chủ
                     </a>
-                    <a href="cart.php" class="px-4 py-2 rounded hover:bg-orange-700 transition">
+                    <a href="cart.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
                         <i class="fas fa-shopping-cart"></i> Giỏ hàng
                     </a>
-                    <a href="profile.php" class="px-4 py-2 rounded hover:bg-orange-700 transition">
+                    <a href="profile.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
                         <i class="fas fa-user"></i> Tài khoản
                     </a>
                 </div>
@@ -154,7 +172,7 @@ $stats = [
         <div class="bg-white rounded-lg shadow mb-6 p-4">
             <div class="flex flex-wrap gap-2">
                 <a href="my_orders.php" 
-                   class="px-4 py-2 rounded-lg <?= empty($status_filter) ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?> transition">
+                   class="px-4 py-2 rounded-lg <?= empty($status_filter) ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?> transition">
                     <i class="fas fa-list"></i> Tất cả (<?= $stats['all'] ?>)
                 </a>
                 <a href="?status=pending" 
@@ -186,7 +204,7 @@ $stats = [
                 <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
                 <h3 class="text-xl font-bold text-gray-700 mb-2">Chưa có đơn hàng nào</h3>
                 <p class="text-gray-500 mb-6">Hãy mua sắm ngay để trải nghiệm dịch vụ của chúng tôi!</p>
-                <a href="products.php" class="inline-block bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 transition">
+                <a href="products.php" class="inline-block bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition">
                     <i class="fas fa-shopping-cart"></i> Mua sắm ngay
                 </a>
             </div>
@@ -230,7 +248,7 @@ $stats = [
                             <div class="flex items-center gap-6">
                                 <div>
                                     <span class="text-xs text-gray-500">Mã đơn hàng</span>
-                                    <p class="font-bold text-orange-600"><?= htmlspecialchars($order['order_code']) ?></p>
+                                    <p class="font-bold text-purple-600"><?= htmlspecialchars($order['order_code']) ?></p>
                                 </div>
                                 <div class="hidden md:block">
                                     <span class="text-xs text-gray-500">Ngày đặt</span>
@@ -238,7 +256,7 @@ $stats = [
                                 </div>
                                 <div class="hidden md:block">
                                     <span class="text-xs text-gray-500">Tổng tiền</span>
-                                    <p class="font-bold text-orange-600"><?= number_format($order['total_amount']) ?>₫</p>
+                                    <p class="font-bold text-purple-600"><?= number_format($order['total_amount']) ?>₫</p>
                                 </div>
                             </div>
                             <div>
@@ -264,7 +282,7 @@ $stats = [
                                             <p class="text-sm text-gray-500">Số lượng: <?= $item['quantity'] ?></p>
                                         </div>
                                         <div class="text-right">
-                                            <p class="font-semibold text-orange-600"><?= number_format($item['total_price']) ?>₫</p>
+                                            <p class="font-semibold text-purple-600"><?= number_format($item['total_price']) ?>₫</p>
                                             <p class="text-xs text-gray-500"><?= number_format($item['product_price']) ?>₫ x <?= $item['quantity'] ?></p>
                                         </div>
                                     </div>
@@ -275,7 +293,7 @@ $stats = [
                         <!-- Footer: Thông tin giao hàng và actions -->
                         <div class="bg-gray-50 px-6 py-4 border-t flex justify-between items-center">
                             <div class="text-sm text-gray-600">
-                                <i class="fas fa-map-marker-alt text-orange-600"></i>
+                                <i class="fas fa-map-marker-alt text-purple-600"></i>
                                 <span class="font-medium">Giao đến:</span> <?= htmlspecialchars($order['shipping_address']) ?>
                             </div>
                             <div class="flex gap-2">
@@ -302,9 +320,18 @@ $stats = [
                                 <?php endif; ?>
                                 <?php if (in_array($order['order_status'], ['pending', 'processing'])): ?>
                                     <button onclick="cancelOrder(<?= $order['id'] ?>, '<?= htmlspecialchars($order['order_code']) ?>')"
-                                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-                                        <i class="fas fa-times"></i> Hủy đơn
+                                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+                                            title="Hủy đơn hàng - Chỉ áp dụng cho đơn hàng chờ xử lý và đang xử lý">
+                                        <i class="fas fa-times"></i> 
+                                        <span class="hidden sm:inline">Hủy đơn</span>
                                     </button>
+                                <?php elseif ($order['order_status'] === 'cancelled'): ?>
+                                    <span class="px-4 py-2 bg-gray-100 text-gray-500 rounded-lg text-sm font-medium flex items-center gap-2">
+                                        <i class="fas fa-ban"></i> Đã hủy
+                                        <?php if (!empty($order['cancelled_at'])): ?>
+                                            <small class="text-xs">(<?= date('d/m/Y', strtotime($order['cancelled_at'])) ?>)</small>
+                                        <?php endif; ?>
+                                    </span>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -324,7 +351,7 @@ $stats = [
                     
                     <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
                         <a href="?page=<?= $i ?>&status=<?= urlencode($status_filter) ?>" 
-                           class="px-4 py-2 <?= $i === $page ? 'bg-orange-600 text-white' : 'bg-white border hover:bg-gray-50' ?> rounded-lg transition">
+                           class="px-4 py-2 <?= $i === $page ? 'bg-purple-600 text-white' : 'bg-white border hover:bg-gray-50' ?> rounded-lg transition">
                             <?= $i ?>
                         </a>
                     <?php endfor; ?>
@@ -383,7 +410,7 @@ $stats = [
     <script>
         function viewOrderDetail(orderId) {
             document.getElementById('orderDetailModal').classList.remove('hidden');
-            document.getElementById('orderDetailContent').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-4xl text-orange-600"></i></div>';
+            document.getElementById('orderDetailContent').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-4xl text-purple-600"></i></div>';
             
             fetch('get_order_details.php?id=' + orderId)
                 .then(response => response.json())
@@ -420,7 +447,7 @@ $stats = [
                     <div>
                         <h4 class="font-bold text-gray-800 mb-3">Thông tin đơn hàng</h4>
                         <div class="space-y-2 text-sm">
-                            <p><span class="font-medium">Mã đơn:</span> <span class="text-orange-600 font-bold">${order.order_code}</span></p>
+                            <p><span class="font-medium">Mã đơn:</span> <span class="text-purple-600 font-bold">${order.order_code}</span></p>
                             <p><span class="font-medium">Ngày đặt:</span> ${new Date(order.created_at).toLocaleString('vi-VN')}</p>
                             <p><span class="font-medium">Trạng thái:</span> <span class="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">${statusLabels[order.order_status] || order.order_status}</span></p>
                             <p><span class="font-medium">Thanh toán:</span> ${paymentLabels[order.payment_method] || order.payment_method}</p>
@@ -481,7 +508,7 @@ $stats = [
                             </div>
                             <div class="flex justify-between font-bold text-lg border-t pt-2">
                                 <span>Tổng cộng:</span>
-                                <span class="text-orange-600">${parseInt(order.total_amount).toLocaleString('vi-VN')}₫</span>
+                                <span class="text-purple-600">${parseInt(order.total_amount).toLocaleString('vi-VN')}₫</span>
                             </div>
                         </div>
                     </div>
@@ -497,7 +524,7 @@ $stats = [
         
         function openReviewModal(orderId) {
             document.getElementById('reviewModal').classList.remove('hidden');
-            document.getElementById('reviewContent').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-4xl text-orange-600"></i></div>';
+            document.getElementById('reviewContent').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-4xl text-purple-600"></i></div>';
             
             // Load sản phẩm trong đơn hàng
             fetch('get_order_items_for_review.php?order_id=' + orderId)
@@ -548,7 +575,7 @@ $stats = [
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nhận xét của bạn</label>
                             <textarea name="comment_${item.product_id}" rows="3" 
-                                      class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                      class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                                       placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."></textarea>
                         </div>
                     </div>
@@ -563,7 +590,7 @@ $stats = [
                         <i class="fas fa-times"></i> Hủy
                     </button>
                     <button type="submit" 
-                            class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">
+                            class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
                         <i class="fas fa-paper-plane"></i> Gửi đánh giá
                     </button>
                 </div>
@@ -593,7 +620,20 @@ $stats = [
         }
         
         function cancelOrder(orderId, orderCode) {
-            if (confirm('Bạn có chắc muốn hủy đơn hàng "' + orderCode + '"?')) {
+            // Hiển thị modal xác nhận với thông tin chi tiết
+            const confirmMessage = `Bạn có chắc muốn hủy đơn hàng "${orderCode}"?\n\n` +
+                                 `⚠️ Lưu ý:\n` +
+                                 `• Đơn hàng sẽ được hủy ngay lập tức\n` +
+                                 `• Bạn không thể hoàn tác thao tác này\n\n` +
+                                 `Nhấn OK để xác nhận hủy đơn hàng.`;
+            
+            if (confirm(confirmMessage)) {
+                // Hiển thị loading
+                const cancelBtn = event.target;
+                const originalText = cancelBtn.innerHTML;
+                cancelBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang hủy...';
+                cancelBtn.disabled = true;
+                
                 document.getElementById('cancel_order_id').value = orderId;
                 document.getElementById('cancelForm').submit();
             }

@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <header class="bg-gradient-to-r from-orange-500 to-amber-500 text-white sticky top-0 z-50 shadow-xl">
+  <header class="bg-gradient-to-r from-purple-500 to-blue-500 text-white sticky top-0 z-50 shadow-xl">
     <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
       <a href="index.php" class="flex items-center gap-4 hover:opacity-90 transition">
         <img src="uploads/logo.png" alt="VLXD Logo" class="w-16 h-16 object-cover rounded-full">
@@ -18,10 +18,10 @@
       </a>
       <div class="flex items-center gap-8">
         <nav class="flex items-center gap-6">
-          <a href="index.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2">
+          <a href="index.php" class="text-white font-bold hover:text-purple-200 transition text-lg flex items-center gap-2">
             <i class="fas fa-home"></i> Trang chủ
           </a>
-          <a href="products.php" class="text-white font-bold hover:text-orange-200 transition text-lg flex items-center gap-2">
+          <a href="products.php" class="text-white font-bold hover:text-purple-200 transition text-lg flex items-center gap-2">
             <i class="fas fa-box"></i> Sản phẩm
           </a>
         </nav>
@@ -30,11 +30,11 @@
           <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
             <div class="flex items-center gap-3">
               <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-                <a href="admin.php" class="bg-yellow-400 text-orange-900 px-4 py-2 rounded-full font-bold hover:bg-yellow-300 transition flex items-center gap-2 shadow-lg text-sm">
+                <a href="admin.php" class="bg-yellow-400 text-purple-900 px-4 py-2 rounded-full font-bold hover:bg-yellow-300 transition flex items-center gap-2 shadow-lg text-sm">
                   <i class="fas fa-user-shield"></i> Quản trị
                 </a>
               <?php endif; ?>
-              <a href="profile.php" class="text-white font-bold hover:text-orange-200 transition text-lg">
+              <a href="profile.php" class="text-white font-bold hover:text-purple-200 transition text-lg">
                 👤 <?= htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['user_email']) ?>
               </a>
               <a href="logout.php" class="bg-red-600 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition">
@@ -42,10 +42,10 @@
               </a>
             </div>
           <?php else: ?>
-            <a href="login.php" class="bg-white text-orange-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition">
+            <a href="login.php" class="bg-white text-purple-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition">
               Đăng nhập
             </a>
-            <a href="dangki.php" class="border-2 border-white text-white px-6 py-3 rounded-full font-bold hover:bg-orange-400 transition">
+            <a href="dangki.php" class="border-2 border-white text-white px-6 py-3 rounded-full font-bold hover:bg-purple-400 transition">
               Đăng ký
             </a>
           <?php endif; ?>
@@ -59,7 +59,7 @@
           $row = $res ? $res->fetch_assoc() : null;
           $count = $row['total_qty'] ?? 0;
           $hiddenClass = ($count > 0) ? '' : 'hidden';
-          echo "<span id='cart-count' class='absolute -top-2 -right-2 bg-white text-orange-600 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md $hiddenClass'>{$count}</span>";
+          echo "<span id='cart-count' class='absolute -top-2 -right-2 bg-white text-purple-600 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md $hiddenClass'>{$count}</span>";
           ?>
         </a>
       </div>
@@ -87,7 +87,7 @@
       <div class="text-center py-16">
         <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
         <p class="text-2xl text-gray-600 font-semibold mb-6">Giỏ hàng trống!</p>
-        <a href="index.php" class="bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 transition font-bold">
+        <a href="index.php" class="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition font-bold">
           <i class="fas fa-shopping-bag"></i> Tiếp tục mua sắm
         </a>
       </div>
@@ -97,7 +97,7 @@
         <!-- Products List -->
         <div class="lg:col-span-2">
           <div class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="bg-gradient-to-r from-orange-600 to-orange-500 px-6 py-4">
+            <div class="bg-gradient-to-r from-purple-600 to-blue-500 px-6 py-4">
               <h2 class="text-white font-bold text-lg"><i class="fas fa-list"></i> Danh sách sản phẩm</h2>
             </div>
             <div class="divide-y">
@@ -114,7 +114,12 @@
                   try {
                     $images_json = json_decode($row['product_images'], true);
                     if (is_array($images_json) && count($images_json) > 0) {
-                      $image = $images_json[0];
+                      $first_image = $images_json[0];
+                      if (strpos($first_image, 'uploads/') === 0) {
+                          $image = $first_image;
+                      } else {
+                          $image = 'uploads/' . $first_image;
+                      }
                     }
                   } catch (Exception $e) {
                     // Nếu JSON không hợp lệ, dùng placeholder
@@ -142,17 +147,17 @@
                     
                     <div class="flex justify-between items-center">
                       <div class="flex items-center gap-3">
-                        <span class="text-xl font-bold text-orange-600"><?= number_format($price) ?>đ</span>
+                        <span class="text-xl font-bold text-purple-600"><?= number_format($price) ?>đ</span>
                         <span class="text-gray-500 text-sm">/ sản phẩm</span>
                       </div>
                       
                       <!-- Quantity Control -->
                       <div class="flex items-center gap-2 bg-gray-100 rounded-lg px-2 py-1">
-                        <button class="qty-decrease px-3 py-1 text-gray-600 hover:text-orange-600 transition font-bold" data-ci-id="<?= $ci_id ?>">
+                        <button class="qty-decrease px-3 py-1 text-gray-600 hover:text-purple-600 transition font-bold" data-ci-id="<?= $ci_id ?>">
                           <i class="fas fa-minus"></i>
                         </button>
                         <input type="number" class="qty-input w-12 text-center border-0 bg-gray-100 font-bold" value="<?= $quantity ?>" min="1" max="999" data-ci-id="<?= $ci_id ?>" readonly>
-                        <button class="qty-increase px-3 py-1 text-gray-600 hover:text-orange-600 transition font-bold" data-ci-id="<?= $ci_id ?>">
+                        <button class="qty-increase px-3 py-1 text-gray-600 hover:text-purple-600 transition font-bold" data-ci-id="<?= $ci_id ?>">
                           <i class="fas fa-plus"></i>
                         </button>
                       </div>
@@ -163,7 +168,7 @@
                 <!-- Total for this item -->
                 <div class="mt-4 pt-4 border-t flex justify-between items-center">
                   <span class="text-gray-600">Thành tiền:</span>
-                  <span class="text-2xl font-black text-orange-600 item-total"><?= number_format($thanhtien) ?>đ</span>
+                  <span class="text-2xl font-black text-purple-600 item-total"><?= number_format($thanhtien) ?>đ</span>
                 </div>
               </div>
               <?php endwhile; ?>
@@ -174,7 +179,7 @@
         <!-- Summary Sidebar -->
         <div class="lg:col-span-1">
           <div class="bg-white rounded-xl shadow-md sticky top-24 overflow-hidden">
-            <div class="bg-gradient-to-r from-orange-600 to-orange-500 px-6 py-4">
+            <div class="bg-gradient-to-r from-purple-600 to-blue-500 px-6 py-4">
               <h2 class="text-white font-bold text-lg"><i class="fas fa-calculator"></i> Tóm tắt đơn hàng</h2>
             </div>
             
@@ -192,14 +197,14 @@
               </div>
               
               <!-- Total -->
-              <div class="flex justify-between items-center py-4 bg-orange-50 px-4 rounded-lg">
+              <div class="flex justify-between items-center py-4 bg-purple-50 px-4 rounded-lg">
                 <span class="font-bold text-lg text-gray-800">Tổng tiền:</span>
-                <span class="text-3xl font-black text-orange-600 final-total"><?= number_format($total) ?>đ</span>
+                <span class="text-3xl font-black text-purple-600 final-total"><?= number_format($total) ?>đ</span>
               </div>
 
               <!-- Action Buttons -->
               <div class="space-y-3 pt-4">
-                <button class="checkout-btn w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 rounded-lg font-bold hover:shadow-lg transition">
+                <button class="checkout-btn w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 rounded-lg font-bold hover:shadow-lg transition">
                   <i class="fas fa-lock"></i> THANH TOÁN
                 </button>
                 <a href="index.php" class="block text-center bg-gray-200 text-gray-800 py-3 rounded-lg font-bold hover:bg-gray-300 transition">

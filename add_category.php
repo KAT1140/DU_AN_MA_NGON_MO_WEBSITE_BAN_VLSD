@@ -10,5 +10,5 @@ if (!empty($_POST['name'])) {
 
 <form method="POST" class="max-w-xl mx-auto mt-10">
   <input type="text" name="name" placeholder="Tên danh mục" required class="p-3 border rounded w-full mb-4">
-  <button type="submit" class="px-6 py-3 bg-orange-600 text-white rounded">Thêm danh mục</button>
+  <button type="submit" class="px-6 py-3 bg-purple-600 text-white rounded">Thêm danh mục</button>
 </form>

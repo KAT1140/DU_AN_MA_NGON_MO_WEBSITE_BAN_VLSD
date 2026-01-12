@@ -109,6 +109,11 @@ $admin_count = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'a
 
 // Đếm đơn hàng chờ xử lý
 $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order_status = 'pending'")->fetch_assoc()['count'];
+
+// Thống kê inventory
+require_once 'inventory_functions.php';
+$inventory_stats = getInventoryStats($conn);
+$inventory_alerts = getInventoryAlerts($conn);
 ?>
 
 <!DOCTYPE html>
@@ -119,10 +124,25 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
   <title>Admin - Quản lý người dùng</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .animate-pulse-slow {
+      animation: pulse-slow 2s infinite;
+    }
+    .quick-action-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .quick-action-card:hover {
+      transform: translateY(-4px) scale(1.02);
+    }
+  </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-  <header class="bg-gradient-to-r from-blue-600 to-blue-500 text-white sticky top-0 z-40 shadow-lg">
+  <header class="bg-gradient-to-r from-purple-600 to-blue-500 text-white sticky top-0 z-40 shadow-lg">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
@@ -145,12 +165,39 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
                </span>
            <?php endif; ?>
         </a>
+        <a href="inventory_management.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm">
+           <i class="fas fa-warehouse"></i> Kho hàng
+        </a>
+        <a href="admin_suppliers.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm">
+           <i class="fas fa-truck"></i> Nhà phân phối
+        </a>
       </nav>
     </div>
   </header>
 
   <div class="max-w-7xl mx-auto p-6">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Cảnh báo inventory -->
+    <?php if (!empty($inventory_alerts)): ?>
+        <div class="mb-6 space-y-3">
+            <?php foreach ($inventory_alerts as $alert): ?>
+                <div class="bg-<?= $alert['type'] === 'danger' ? 'red' : 'yellow' ?>-100 border border-<?= $alert['type'] === 'danger' ? 'red' : 'yellow' ?>-400 text-<?= $alert['type'] === 'danger' ? 'red' : 'yellow' ?>-700 px-4 py-3 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-<?= $alert['type'] === 'danger' ? 'exclamation-circle' : 'exclamation-triangle' ?> text-xl"></i>
+                        <div>
+                            <strong><?= htmlspecialchars($alert['title']) ?></strong>
+                            <p class="text-sm"><?= htmlspecialchars($alert['message']) ?></p>
+                        </div>
+                    </div>
+                    <a href="inventory_report.php?filter=<?= $alert['type'] === 'danger' ? 'out_of_stock' : 'low_stock' ?>" 
+                       class="bg-<?= $alert['type'] === 'danger' ? 'red' : 'yellow' ?>-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-<?= $alert['type'] === 'danger' ? 'red' : 'yellow' ?>-700 transition">
+                        Xem chi tiết
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <div class="bg-white p-6 rounded-xl shadow border-l-4 border-blue-500 flex justify-between items-center">
          <div><p class="text-gray-500">Tổng người dùng</p><p class="text-3xl font-bold text-blue-600"><?= $total_users ?></p></div>
          <i class="fas fa-users text-4xl text-blue-100"></i>
@@ -159,9 +206,184 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
          <div><p class="text-gray-500">Quản trị viên</p><p class="text-3xl font-bold text-green-600"><?= $admin_count ?></p></div>
          <i class="fas fa-crown text-4xl text-green-100"></i>
       </div>
-      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-orange-500 flex justify-between items-center">
-         <div><p class="text-gray-500">Khách hàng</p><p class="text-3xl font-bold text-orange-600"><?= $total_users - $admin_count ?></p></div>
-         <i class="fas fa-shopping-bag text-4xl text-orange-100"></i>
+      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-purple-500 flex justify-between items-center">
+         <div><p class="text-gray-500">Khách hàng</p><p class="text-3xl font-bold text-purple-600"><?= $total_users - $admin_count ?></p></div>
+         <i class="fas fa-shopping-bag text-4xl text-purple-100"></i>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-purple-500 flex justify-between items-center">
+         <div><p class="text-gray-500">Tổng sản phẩm</p><p class="text-3xl font-bold text-purple-600"><?= number_format($inventory_stats['total_products']) ?></p></div>
+         <i class="fas fa-boxes text-4xl text-purple-100"></i>
+      </div>
+    </div>
+
+    <!-- Thống Kê Theo Danh Mục -->
+    <div class="mb-8">
+      <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6 rounded-xl shadow-lg">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-2xl font-bold flex items-center gap-3">
+            <i class="fas fa-chart-pie"></i> Thống Kê Theo Danh Mục
+          </h2>
+          <a href="inventory_report.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-semibold transition">
+            <i class="fas fa-external-link-alt"></i> Xem Chi Tiết
+          </a>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white bg-opacity-10 p-4 rounded-lg backdrop-blur-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-purple-100 text-sm">Hết hàng</p>
+                <p class="text-3xl font-bold"><?= number_format($inventory_stats['out_of_stock']) ?></p>
+                <p class="text-purple-200 text-xs mt-1">sản phẩm</p>
+              </div>
+              <div class="bg-red-500 bg-opacity-80 p-3 rounded-full">
+                <i class="fas fa-times-circle text-2xl"></i>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white bg-opacity-10 p-4 rounded-lg backdrop-blur-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-purple-100 text-sm">Sắp hết hàng</p>
+                <p class="text-3xl font-bold"><?= number_format($inventory_stats['low_stock']) ?></p>
+                <p class="text-purple-200 text-xs mt-1">sản phẩm</p>
+              </div>
+              <div class="bg-yellow-500 bg-opacity-80 p-3 rounded-full">
+                <i class="fas fa-exclamation-triangle text-2xl"></i>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white bg-opacity-10 p-4 rounded-lg backdrop-blur-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-purple-100 text-sm">Giá trị tồn kho</p>
+                <p class="text-2xl font-bold"><?= number_format($inventory_stats['total_value'], 0, ',', '.') ?>đ</p>
+                <p class="text-purple-200 text-xs mt-1">tổng giá trị</p>
+              </div>
+              <div class="bg-green-500 bg-opacity-80 p-3 rounded-full">
+                <i class="fas fa-dollar-sign text-2xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Quản Lý Nhanh -->
+    <div class="mb-8">
+      <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <i class="fas fa-tachometer-alt text-blue-500"></i> Quản Lý Nhanh
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <!-- Xem Hàng Trong Kho -->
+        <a href="inventory_report.php" class="quick-action-card bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-6 rounded-xl shadow-lg hover:shadow-xl group">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-lg mb-2">Hàng Trong Kho</h3>
+              <p class="text-blue-100 text-sm">Xem tất cả sản phẩm và tồn kho</p>
+              <div class="mt-3 flex items-center gap-2">
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                  <?= number_format($inventory_stats['total_products']) ?> sản phẩm
+                </span>
+              </div>
+            </div>
+            <div class="bg-white bg-opacity-20 p-3 rounded-full group-hover:bg-opacity-30 transition-all">
+              <i class="fas fa-boxes text-2xl"></i>
+            </div>
+          </div>
+        </a>
+
+        <!-- Quản Lý Kho -->
+        <a href="inventory_management.php" class="quick-action-card bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white p-6 rounded-xl shadow-lg hover:shadow-xl group">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-lg mb-2">Quản Lý Kho</h3>
+              <p class="text-green-100 text-sm">Nhập/xuất hàng và lịch sử</p>
+              <div class="mt-3 flex items-center gap-2">
+                <?php if ($inventory_stats['low_stock'] > 0): ?>
+                  <span class="text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full animate-pulse-slow">
+                    <?= $inventory_stats['low_stock'] ?> sắp hết
+                  </span>
+                <?php endif; ?>
+                <?php if ($inventory_stats['out_of_stock'] > 0): ?>
+                  <span class="text-xs bg-red-400 text-red-900 px-2 py-1 rounded-full animate-pulse-slow">
+                    <?= $inventory_stats['out_of_stock'] ?> hết hàng
+                  </span>
+                <?php endif; ?>
+              </div>
+            </div>
+            <div class="bg-white bg-opacity-20 p-3 rounded-full group-hover:bg-opacity-30 transition-all">
+              <i class="fas fa-warehouse text-2xl"></i>
+            </div>
+          </div>
+        </a>
+
+        <!-- Sản Phẩm -->
+        <a href="admin_products.php" class="quick-action-card bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white p-6 rounded-xl shadow-lg hover:shadow-xl group">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-lg mb-2">Sản Phẩm</h3>
+              <p class="text-purple-100 text-sm">Quản lý danh mục sản phẩm</p>
+              <div class="mt-3">
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                  Quản lý catalog
+                </span>
+              </div>
+            </div>
+            <div class="bg-white bg-opacity-20 p-3 rounded-full group-hover:bg-opacity-30 transition-all">
+              <i class="fas fa-cube text-2xl"></i>
+            </div>
+          </div>
+        </a>
+
+        <!-- Nhà Phân Phối -->
+        <a href="admin_suppliers.php" class="quick-action-card bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white p-6 rounded-xl shadow-lg hover:shadow-xl group">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-lg mb-2">Nhà Phân Phối</h3>
+              <p class="text-indigo-100 text-sm">Quản lý nhà cung cấp</p>
+              <div class="mt-3">
+                <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                  Suppliers
+                </span>
+              </div>
+            </div>
+            <div class="bg-white bg-opacity-20 p-3 rounded-full group-hover:bg-opacity-30 transition-all">
+              <i class="fas fa-truck text-2xl"></i>
+            </div>
+          </div>
+        </a>
+
+        <!-- Đơn Hàng -->
+        <a href="admin_orders.php" class="quick-action-card bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white p-6 rounded-xl shadow-lg hover:shadow-xl group relative">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-lg mb-2">Đơn Hàng</h3>
+              <p class="text-purple-100 text-sm">Xử lý đơn hàng khách hàng</p>
+              <div class="mt-3">
+                <?php if ($pending_orders > 0): ?>
+                  <span class="text-xs bg-red-400 text-red-900 px-2 py-1 rounded-full animate-pulse-slow">
+                    <?= $pending_orders ?> chờ xử lý
+                  </span>
+                <?php else: ?>
+                  <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                    Tất cả đã xử lý
+                  </span>
+                <?php endif; ?>
+              </div>
+            </div>
+            <div class="bg-white bg-opacity-20 p-3 rounded-full group-hover:bg-opacity-30 transition-all">
+              <i class="fas fa-shopping-cart text-2xl"></i>
+            </div>
+          </div>
+          <?php if ($pending_orders > 0): ?>
+            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold animate-pulse">
+              <?= $pending_orders ?>
+            </span>
+          <?php endif; ?>
+        </a>
       </div>
     </div>
 

@@ -180,12 +180,57 @@ $categories = $conn->query("SELECT id, NAME FROM categories WHERE STATUS = 1 ORD
 // Fetch suppliers
 $suppliers = $conn->query("SELECT id, NAME FROM suppliers WHERE STATUS = 1 ORDER BY NAME");
 
-// Fetch products
-$products = $conn->query("SELECT p.id, p.NAME, p.sku, p.price, p.quantity, c.NAME as category, s.NAME as supplier 
-                          FROM products p 
-                          LEFT JOIN categories c ON c.id = p.category_id 
-                          LEFT JOIN suppliers s ON s.id = p.supplier_id 
-                          ORDER BY p.id DESC");
+// Fetch products with filtering
+$category_filter = $_GET['category'] ?? '';
+$search_filter = $_GET['search'] ?? '';
+$status_filter = $_GET['status'] ?? '';
+
+$where_conditions = [];
+$params = [];
+$param_types = '';
+
+if (!empty($category_filter)) {
+    $where_conditions[] = "p.category_id = ?";
+    $params[] = (int)$category_filter;
+    $param_types .= 'i';
+}
+
+if (!empty($search_filter)) {
+    $where_conditions[] = "(p.NAME LIKE ? OR p.sku LIKE ? OR p.description LIKE ?)";
+    $search_term = "%{$search_filter}%";
+    $params[] = $search_term;
+    $params[] = $search_term;
+    $params[] = $search_term;
+    $param_types .= 'sss';
+}
+
+if (!empty($status_filter)) {
+    if ($status_filter === 'in_stock') {
+        $where_conditions[] = "p.quantity > 0";
+    } elseif ($status_filter === 'out_of_stock') {
+        $where_conditions[] = "p.quantity = 0";
+    } elseif ($status_filter === 'low_stock') {
+        $where_conditions[] = "p.quantity > 0 AND p.quantity <= 10";
+    }
+}
+
+$where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+
+$sql = "SELECT p.id, p.NAME, p.sku, p.price, p.quantity, c.NAME as category, s.NAME as supplier, p.created_at
+        FROM products p 
+        LEFT JOIN categories c ON c.id = p.category_id 
+        LEFT JOIN suppliers s ON s.id = p.supplier_id 
+        {$where_clause}
+        ORDER BY p.id DESC";
+
+if (!empty($params)) {
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param($param_types, ...$params);
+    $stmt->execute();
+    $products = $stmt->get_result();
+} else {
+    $products = $conn->query($sql);
+}
 
 // Đếm đơn hàng chờ xử lý
 $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order_status = 'pending'")->fetch_assoc()['count'];
@@ -214,7 +259,7 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
         <a href="admin.php" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
           <i class="fas fa-users"></i> Quản lý người dùng
         </a>
-        <a href="admin_orders.php" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition relative">
+        <a href="admin_orders.php" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition relative">
           <i class="fas fa-shopping-cart"></i> Đơn hàng
           <?php if ($pending_orders > 0): ?>
               <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
@@ -240,7 +285,7 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
       <!-- Add Product Form -->
       <div class="lg:col-span-1">
         <div class="bg-white rounded-xl shadow-md overflow-hidden sticky top-6">
-          <div class="bg-gradient-to-r from-orange-600 to-orange-500 px-6 py-4">
+          <div class="bg-gradient-to-r from-purple-600 to-blue-500 px-6 py-4">
             <h2 class="text-white font-bold text-lg"><i class="fas fa-plus-circle"></i> Thêm sản phẩm</h2>
           </div>
           
@@ -249,17 +294,17 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
             
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">Tên sản phẩm *</label>
-              <input type="text" name="name" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Ví dụ: Xi măng Holcim">
+              <input type="text" name="name" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ví dụ: Xi măng Holcim">
             </div>
             
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">SKU *</label>
-              <input type="text" name="sku" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="XM-001">
+              <input type="text" name="sku" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="XM-001">
             </div>
             
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">Danh mục *</label>
-              <select name="category_id" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <select name="category_id" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                 <option value="">-- Chọn danh mục --</option>
                 <?php while ($cat = $categories->fetch_assoc()): ?>
                   <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['NAME']) ?></option>
@@ -269,7 +314,7 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
             
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">Nhà cung cấp</label>
-              <select name="supplier_id" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <select name="supplier_id" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                 <option value="">-- Chọn nhà cung cấp --</option>
                 <?php 
                 $suppliers = $conn->query("SELECT id, NAME FROM suppliers WHERE STATUS = 1 ORDER BY NAME");
@@ -282,42 +327,42 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
             
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">Giá bán (VNĐ) *</label>
-              <input type="number" name="price" required step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="185000">
+              <input type="number" name="price" required step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="185000">
             </div>
             
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">Giá khuyến mãi (VNĐ)</label>
-              <input type="number" name="sale_price" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="175000">
+              <input type="number" name="sale_price" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="175000">
             </div>
             
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">Giá vốn (VNĐ)</label>
-              <input type="number" name="cost_price" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="160000">
+              <input type="number" name="cost_price" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="160000">
             </div>
             
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">Số lượng tồn</label>
-              <input type="number" name="quantity" value="0" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <input type="number" name="quantity" value="0" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
             </div>
             
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">Đơn vị</label>
-              <input type="text" name="unit" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="bao, viên, ...">
+              <input type="text" name="unit" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="bao, viên, ...">
             </div>
             
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">Mô tả ngắn</label>
-              <textarea name="short_description" rows="2" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Mô tả ngắn..."></textarea>
+              <textarea name="short_description" rows="2" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Mô tả ngắn..."></textarea>
             </div>
             
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">Mô tả chi tiết</label>
-              <textarea name="description" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Mô tả chi tiết..."></textarea>
+              <textarea name="description" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Mô tả chi tiết..."></textarea>
             </div>
             
             <div class="col-span-2">
               <label class="block text-sm font-bold text-gray-700 mb-2">Hình ảnh sản phẩm (Tối đa 5 ảnh)</label>
-              <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 transition">
+              <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-purple-500 transition">
                 <input type="file" name="images[]" id="productImages" multiple accept="image/*" class="hidden" onchange="previewImages(event)">
                 <label for="productImages" class="cursor-pointer flex flex-col items-center">
                   <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
@@ -328,7 +373,7 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
               <div id="imagePreview" class="grid grid-cols-5 gap-2 mt-3"></div>
             </div>
             
-            <button type="submit" class="w-full bg-orange-500 text-white py-3 rounded-lg font-bold hover:bg-orange-600 transition col-span-2">
+            <button type="submit" class="w-full bg-purple-500 text-white py-3 rounded-lg font-bold hover:bg-purple-600 transition col-span-2">
               <i class="fas fa-plus"></i> Thêm sản phẩm
             </button>
           </form>
@@ -337,6 +382,56 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
 
       <!-- Products List -->
       <div class="lg:col-span-2">
+        <!-- Filter Form -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+          <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-filter text-purple-600"></i> Lọc & Tìm kiếm sản phẩm
+          </h3>
+          
+          <form method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">Tìm kiếm</label>
+              <input type="text" name="search" value="<?= htmlspecialchars($search_filter) ?>" 
+                     placeholder="Tên, SKU, mô tả..." 
+                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">Danh mục</label>
+              <select name="category" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <option value="">-- Tất cả danh mục --</option>
+                <?php 
+                $categories_filter = $conn->query("SELECT id, NAME FROM categories WHERE STATUS = 1 ORDER BY NAME");
+                while ($cat = $categories_filter->fetch_assoc()): 
+                ?>
+                  <option value="<?= $cat['id'] ?>" <?= $category_filter == $cat['id'] ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($cat['NAME']) ?>
+                  </option>
+                <?php endwhile; ?>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">Trạng thái kho</label>
+              <select name="status" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <option value="">-- Tất cả --</option>
+                <option value="in_stock" <?= $status_filter === 'in_stock' ? 'selected' : '' ?>>Còn hàng</option>
+                <option value="low_stock" <?= $status_filter === 'low_stock' ? 'selected' : '' ?>>Sắp hết (≤10)</option>
+                <option value="out_of_stock" <?= $status_filter === 'out_of_stock' ? 'selected' : '' ?>>Hết hàng</option>
+              </select>
+            </div>
+            
+            <div class="flex items-end gap-2">
+              <button type="submit" class="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                <i class="fas fa-search"></i> Lọc
+              </button>
+              <a href="admin_products.php" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                <i class="fas fa-times"></i>
+              </a>
+            </div>
+          </form>
+        </div>
+
         <div class="bg-white rounded-xl shadow-md overflow-hidden">
           <div class="bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-4">
             <h2 class="text-white font-bold text-lg"><i class="fas fa-list"></i> Danh sách sản phẩm</h2>
@@ -358,13 +453,13 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
                 <?php if ($products && $products->num_rows > 0): ?>
                   <?php while ($p = $products->fetch_assoc()): ?>
                     <tr class="border-b hover:bg-gray-50">
-                      <td class="px-4 py-3 font-bold text-orange-600">#<?= $p['id'] ?></td>
+                      <td class="px-4 py-3 font-bold text-purple-600">#<?= $p['id'] ?></td>
                       <td class="px-4 py-3">
                         <div class="font-bold"><?= htmlspecialchars($p['NAME']) ?></div>
                         <div class="text-xs text-gray-600">📦 <?= htmlspecialchars($p['category'] ?? 'N/A') ?></div>
                       </td>
                       <td class="px-4 py-3 text-gray-600"><?= htmlspecialchars($p['sku']) ?></td>
-                      <td class="px-4 py-3 text-center font-bold text-orange-600"><?= number_format($p['price']) ?>đ</td>
+                      <td class="px-4 py-3 text-center font-bold text-purple-600"><?= number_format($p['price']) ?>đ</td>
                       <td class="px-4 py-3 text-center">
                         <span class="inline-block px-3 py-1 rounded-full text-white font-bold <?= $p['quantity'] > 0 ? 'bg-green-500' : 'bg-red-500' ?>">
                           <?= $p['quantity'] ?>
@@ -409,17 +504,17 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
         
         <div>
           <label class="block text-sm font-bold text-gray-700 mb-2">Tên sản phẩm *</label>
-          <input type="text" name="name" id="editName" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+          <input type="text" name="name" id="editName" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
         </div>
         
         <div>
           <label class="block text-sm font-bold text-gray-700 mb-2">Mã SKU *</label>
-          <input type="text" name="sku" id="editSku" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+          <input type="text" name="sku" id="editSku" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
         </div>
         
         <div>
           <label class="block text-sm font-bold text-gray-700 mb-2">Danh mục *</label>
-          <select name="category_id" id="editCategory" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+          <select name="category_id" id="editCategory" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
             <?php 
             $categories = $conn->query("SELECT id, NAME FROM categories WHERE STATUS = 1 ORDER BY NAME");
             while ($cat = $categories->fetch_assoc()): 
@@ -431,7 +526,7 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
         
         <div>
           <label class="block text-sm font-bold text-gray-700 mb-2">Nhà cung cấp</label>
-          <select name="supplier_id" id="editSupplier" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+          <select name="supplier_id" id="editSupplier" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
             <option value="">-- Chọn nhà cung cấp --</option>
             <?php 
             $suppliers = $conn->query("SELECT id, NAME FROM suppliers WHERE STATUS = 1 ORDER BY NAME");
@@ -444,42 +539,42 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
         
         <div>
           <label class="block text-sm font-bold text-gray-700 mb-2">Giá bán (VNĐ) *</label>
-          <input type="number" name="price" id="editPrice" required step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+          <input type="number" name="price" id="editPrice" required step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
         </div>
         
         <div>
           <label class="block text-sm font-bold text-gray-700 mb-2">Giá khuyến mãi (VNĐ)</label>
-          <input type="number" name="sale_price" id="editSalePrice" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+          <input type="number" name="sale_price" id="editSalePrice" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
         </div>
         
         <div>
           <label class="block text-sm font-bold text-gray-700 mb-2">Giá vốn (VNĐ)</label>
-          <input type="number" name="cost_price" id="editCostPrice" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+          <input type="number" name="cost_price" id="editCostPrice" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
         </div>
         
         <div>
           <label class="block text-sm font-bold text-gray-700 mb-2">Số lượng tồn</label>
-          <input type="number" name="quantity" id="editQuantity" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+          <input type="number" name="quantity" id="editQuantity" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
         </div>
         
         <div>
           <label class="block text-sm font-bold text-gray-700 mb-2">Đơn vị</label>
-          <input type="text" name="unit" id="editUnit" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+          <input type="text" name="unit" id="editUnit" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
         </div>
         
         <div>
           <label class="block text-sm font-bold text-gray-700 mb-2">Mô tả ngắn</label>
-          <textarea name="short_description" id="editShortDesc" rows="2" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+          <textarea name="short_description" id="editShortDesc" rows="2" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
         </div>
         
         <div class="col-span-2">
           <label class="block text-sm font-bold text-gray-700 mb-2">Mô tả chi tiết</label>
-          <textarea name="description" id="editDescription" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+          <textarea name="description" id="editDescription" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
         </div>
         
         <div class="col-span-2">
           <label class="block text-sm font-bold text-gray-700 mb-2">Hình ảnh mới (Tối đa 5 ảnh) - Để trống nếu không thay đổi</label>
-          <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 transition">
+          <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-purple-500 transition">
             <input type="file" name="images[]" id="editProductImages" multiple accept="image/*" class="hidden" onchange="previewEditImages(event)">
             <label for="editProductImages" class="cursor-pointer flex flex-col items-center">
               <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
@@ -495,7 +590,7 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
           <button type="button" onclick="closeEditModal()" class="flex-1 bg-gray-400 text-white py-3 rounded-lg hover:bg-gray-500 transition font-bold">
             Hủy
           </button>
-          <button type="submit" class="flex-1 bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition font-bold">
+          <button type="submit" class="flex-1 bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition font-bold">
             <i class="fas fa-save"></i> Cập nhật
           </button>
         </div>
