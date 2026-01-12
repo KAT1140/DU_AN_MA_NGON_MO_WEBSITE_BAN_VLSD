@@ -1,0 +1,205 @@
+/* Purple-Blue Theme CSS - VLXD KAT */
+
+/* Primary Colors */
+:root {
+    --primary-purple: #8b5cf6;
+    --primary-blue: #3b82f6;
+    --light-purple: #ddd6fe;
+    --dark-purple: #7c3aed;
+    --accent-purple: #a78bfa;
+}
+
+/* Gradient Backgrounds */
+.gradient-purple {
+    background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-blue) 100%);
+}
+
+.gradient-purple-light {
+    background: linear-gradient(135deg, #ddd6fe 0%, #bfdbfe 100%);
+}
+
+/* Button Styles */
+.btn-purple {
+    background-color: var(--primary-purple);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-purple:hover {
+    background-color: var(--dark-purple);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-purple-outline {
+    border: 2px solid var(--primary-purple);
+    color: var(--primary-purple);
+    background: transparent;
+    transition: all 0.3s ease;
+}
+
+.btn-purple-outline:hover {
+    background-color: var(--primary-purple);
+    color: white;
+}
+
+/* Card Styles */
+.card-purple {
+    border-left: 4px solid var(--primary-purple);
+    transition: all 0.3s ease;
+}
+
+.card-purple:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+}
+
+/* Header Styles */
+.header-purple {
+    background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-blue) 100%);
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+}
+
+/* Form Styles */
+.input-purple:focus {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    outline: none;
+}
+
+.select-purple:focus {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    outline: none;
+}
+
+/* Badge Styles */
+.badge-purple {
+    background-color: var(--light-purple);
+    color: var(--dark-purple);
+    border: 1px solid var(--accent-purple);
+}
+
+/* Icon Styles */
+.icon-purple {
+    color: var(--primary-purple);
+}
+
+/* Status Indicators */
+.status-success {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.status-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.status-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* Animation */
+.pulse-purple {
+    animation: pulse-purple 2s infinite;
+}
+
+@keyframes pulse-purple {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+    }
+}
+
+/* Table Styles */
+.table-purple thead {
+    background: linear-gradient(135deg, var(--light-purple) 0%, #bfdbfe 100%);
+    color: var(--dark-purple);
+}
+
+.table-purple tbody tr:hover {
+    background-color: rgba(139, 92, 246, 0.05);
+}
+
+/* Navigation Styles */
+.nav-purple {
+    background: var(--primary-purple);
+}
+
+.nav-purple a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+}
+
+/* Sidebar Styles */
+.sidebar-purple {
+    background: linear-gradient(180deg, var(--primary-purple) 0%, var(--primary-blue) 100%);
+}
+
+/* Modal Styles */
+.modal-purple .modal-header {
+    background: var(--primary-purple);
+    color: white;
+}
+
+/* Progress Bar */
+.progress-purple {
+    background-color: var(--light-purple);
+}
+
+.progress-purple .progress-bar {
+    background-color: var(--primary-purple);
+}
+
+/* Alert Styles */
+.alert-purple {
+    background-color: var(--light-purple);
+    color: var(--dark-purple);
+    border: 1px solid var(--accent-purple);
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .gradient-purple {
+        background: var(--primary-purple);
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .card-purple {
+        background-color: #1f2937;
+        border-left-color: var(--accent-purple);
+    }
+    
+    .table-purple thead {
+        background: var(--dark-purple);
+        color: white;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .gradient-purple,
+    .header-purple {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .btn-purple {
+        border: 1px solid black;
+        background: white;
+        color: black;
+    }
+}
