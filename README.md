@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏗️ VLXD KAT - E-Commerce Platform
+# 🏗️ VLXD KAT
 
 ### 🏢 Website Bán Vật Liệu Xây Dựng Chuyên Nghiệp
 
