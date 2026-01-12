@@ -199,7 +199,7 @@ header('Content-Type: text/html; charset=utf-8');
                         $image_url = 'uploads/' . $first_image;
                     }
                 }
-                $display_price = $p['sale_price'] ?? $p['price'];
+                $display_price = (!empty($p['sale_price']) && $p['sale_price'] > 0) ? $p['sale_price'] : $p['price'];
                 
                 echo "<div class='bg-white rounded-2xl shadow-2xl p-6 text-center hover:shadow-3xl transition flex flex-col h-full transform hover:-translate-y-2 duration-300'>
                         <div class='flex-grow'>
@@ -273,7 +273,7 @@ header('Content-Type: text/html; charset=utf-8');
                       $image_url = 'uploads/' . $first_image;
                   }
               }
-              $display_price = $p['sale_price'] ?? $p['price'];
+              $display_price = (!empty($p['sale_price']) && $p['sale_price'] > 0) ? $p['sale_price'] : $p['price'];
               $avg_rating = round($p['avg_rating'], 1);
               $review_count = $p['review_count'];
               

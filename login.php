@@ -77,7 +77,7 @@ require 'config.php';
             <label class="block text-sm font-semibold text-gray-700 mb-2">🔐 Mật khẩu</label>
             <input 
               type="password" 
-              name="pass" 
+              name="password" 
               placeholder="Nhập mật khẩu của bạn" 
               required 
               class="w-full px-5 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
