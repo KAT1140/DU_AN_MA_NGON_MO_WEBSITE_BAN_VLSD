@@ -142,36 +142,33 @@ $inventory_alerts = getInventoryAlerts($conn);
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-  <header class="bg-gradient-to-r from-purple-600 to-blue-500 text-white sticky top-0 z-40 shadow-lg">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-          <i class="fas fa-users-cog text-2xl"></i>
+  <header class="bg-gradient-to-r from-purple-600 to-blue-500 text-white sticky top-0 z-40 shadow-xl">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+            <i class="fas fa-tachometer-alt text-2xl"></i>
+          </div>
+          <h1 class="text-2xl font-bold">Admin Dashboard</h1>
         </div>
-        <h1 class="text-2xl font-black">Quản lý người dùng</h1>
+        <nav class="flex items-center gap-3">
+          <a href="admin.php" class="bg-white bg-opacity-20 px-3 py-2 rounded-lg font-semibold">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+          </a>
+          <a href="admin_products.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+            <i class="fas fa-boxes"></i> Sản phẩm
+          </a>
+          <a href="admin_orders.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+            <i class="fas fa-shopping-cart"></i> Đơn hàng
+          </a>
+          <a href="admin_suppliers.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+            <i class="fas fa-truck"></i> Nhà phân phối
+          </a>
+          <a href="index.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+            <i class="fas fa-home"></i> Trang chủ
+          </a>
+        </nav>
       </div>
-      <nav class="flex gap-2">
-        <a href="index.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm">
-           <i class="fas fa-home"></i> Trang chủ
-        </a>
-        <a href="admin_products.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm">
-           <i class="fas fa-boxes"></i> Sản phẩm
-        </a>
-        <a href="admin_orders.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm relative">
-           <i class="fas fa-shopping-cart"></i> Đơn hàng
-           <?php if ($pending_orders > 0): ?>
-               <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                   <?= $pending_orders ?>
-               </span>
-           <?php endif; ?>
-        </a>
-        <a href="inventory_management.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm">
-           <i class="fas fa-warehouse"></i> Kho hàng
-        </a>
-        <a href="admin_suppliers.php" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg font-bold text-sm">
-           <i class="fas fa-truck"></i> Nhà phân phối
-        </a>
-      </nav>
     </div>
   </header>
 
@@ -406,14 +403,13 @@ $inventory_alerts = getInventoryAlerts($conn);
               <th class="px-6 py-3">Thông tin</th>
               <th class="px-6 py-3">Liên hệ</th>
               <th class="px-6 py-3 text-center">Vai trò</th>
-              <th class="px-6 py-3 text-center">Hành động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
             <?php while ($u = $users->fetch_assoc()): 
                 $is_me = ($u['id'] == $_SESSION['user_id']);
             ?>
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-gray-50 cursor-pointer transition" onclick='openEditModal(<?= json_encode($u) ?>)'>
               <td class="px-6 py-4 font-bold text-gray-500">#<?= $u['id'] ?></td>
               <td class="px-6 py-4">
                 <p class="font-bold text-gray-800"><?= htmlspecialchars($u['full_name']) ?></p>
@@ -428,23 +424,6 @@ $inventory_alerts = getInventoryAlerts($conn);
                   <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-bold text-xs border border-yellow-200">Admin</span>
                 <?php else: ?>
                   <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-bold text-xs border border-gray-200">Khách</span>
-                <?php endif; ?>
-              </td>
-              <td class="px-6 py-4 text-center space-x-2">
-                <button onclick='openEditModal(<?= json_encode($u) ?>)' class="bg-blue-500 hover:bg-blue-600 text-white w-8 h-8 rounded shadow transition" title="Sửa">
-                    <i class="fas fa-edit"></i>
-                </button>
-                
-                <?php if (!$is_me): ?>
-                <form method="POST" class="inline-block" onsubmit="return confirm('Bạn chắc chắn muốn xóa user này? Hành động này không thể hoàn tác!');">
-                    <input type="hidden" name="action" value="delete_user">
-                    <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
-                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded shadow transition" title="Xóa">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </form>
-                <?php else: ?>
-                    <span class="text-gray-400 text-xs italic">(Bạn)</span>
                 <?php endif; ?>
               </td>
             </tr>
@@ -525,28 +504,63 @@ $inventory_alerts = getInventoryAlerts($conn);
                     <option value="admin">Quản trị viên (Admin)</option>
                 </select>
             </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg shadow mt-2">Cập nhật</button>
+            <div class="flex gap-2 mt-2">
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg shadow">
+                    <i class="fas fa-save"></i> Cập nhật
+                </button>
+                <button type="button" id="deleteUserBtn" onclick="deleteUser()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg shadow">
+                    <i class="fas fa-trash"></i> Xóa tài khoản
+                </button>
+            </div>
         </form>
     </div>
   </div>
 
   <script>
+    let currentUserId = null;
+    let currentUserIsMe = false;
+    const myUserId = <?= $_SESSION['user_id'] ?>;
+
     function openAddModal() {
         document.getElementById('addModal').classList.remove('hidden');
     }
 
     function openEditModal(user) {
+        currentUserId = user.id;
+        currentUserIsMe = (user.id == myUserId);
+        
         document.getElementById('edit_user_id').value = user.id;
         document.getElementById('edit_email').value = user.email;
         document.getElementById('edit_fullname').value = user.full_name;
         document.getElementById('edit_phone').value = user.phone;
         document.getElementById('edit_role').value = user.role;
         
+        // Ẩn/hiện nút xóa
+        const deleteBtn = document.getElementById('deleteUserBtn');
+        if (currentUserIsMe) {
+            deleteBtn.style.display = 'none';
+        } else {
+            deleteBtn.style.display = 'block';
+        }
+        
         document.getElementById('editModal').classList.remove('hidden');
     }
 
     function closeModal(modalId) {
         document.getElementById(modalId).classList.add('hidden');
+    }
+
+    function deleteUser() {
+        if (confirm('Bạn chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác!')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.innerHTML = `
+                <input type="hidden" name="action" value="delete_user">
+                <input type="hidden" name="user_id" value="${currentUserId}">
+            `;
+            document.body.appendChild(form);
+            form.submit();
+        }
     }
     
     // Đóng modal khi click ra ngoài

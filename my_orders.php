@@ -301,23 +301,6 @@ $stats = [
                                         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                                     <i class="fas fa-eye"></i> Chi tiết
                                 </button>
-                                <?php if ($order['order_status'] === 'delivered'): ?>
-                                    <?php
-                                    // Kiểm tra xem đã đánh giá chưa
-                                    $check_review = $conn->query("SELECT COUNT(*) as count FROM reviews WHERE order_id = " . $order['id']);
-                                    $has_review = $check_review->fetch_assoc()['count'] > 0;
-                                    ?>
-                                    <?php if (!$has_review): ?>
-                                        <button onclick="openReviewModal(<?= $order['id'] ?>)" 
-                                                class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition">
-                                            <i class="fas fa-star"></i> Đánh giá
-                                        </button>
-                                    <?php else: ?>
-                                        <span class="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
-                                            <i class="fas fa-check-circle"></i> Đã đánh giá
-                                        </span>
-                                    <?php endif; ?>
-                                <?php endif; ?>
                                 <?php if (in_array($order['order_status'], ['pending', 'processing'])): ?>
                                     <button onclick="cancelOrder(<?= $order['id'] ?>, '<?= htmlspecialchars($order['order_code']) ?>')"
                                             class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
@@ -379,23 +362,6 @@ $stats = [
                 </button>
             </div>
             <div id="orderDetailContent" class="p-6">
-                <!-- Nội dung sẽ được load bằng JavaScript -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal đánh giá -->
-    <div id="reviewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white">
-                <h3 class="text-xl font-bold text-gray-800">
-                    <i class="fas fa-star text-yellow-500"></i> Đánh giá đơn hàng
-                </h3>
-                <button onclick="closeReviewModal()" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times text-2xl"></i>
-                </button>
-            </div>
-            <div id="reviewContent" class="p-6">
                 <!-- Nội dung sẽ được load bằng JavaScript -->
             </div>
         </div>
@@ -522,103 +488,6 @@ $stats = [
             document.getElementById('orderDetailModal').classList.add('hidden');
         }
         
-        function openReviewModal(orderId) {
-            document.getElementById('reviewModal').classList.remove('hidden');
-            document.getElementById('reviewContent').innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-4xl text-purple-600"></i></div>';
-            
-            // Load sản phẩm trong đơn hàng
-            fetch('get_order_items_for_review.php?order_id=' + orderId)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        displayReviewForm(orderId, data.items);
-                    } else {
-                        document.getElementById('reviewContent').innerHTML = '<div class="text-center text-red-600">Lỗi: ' + data.message + '</div>';
-                    }
-                })
-                .catch(error => {
-                    document.getElementById('reviewContent').innerHTML = '<div class="text-center text-red-600">Lỗi khi tải dữ liệu</div>';
-                });
-        }
-        
-        function displayReviewForm(orderId, items) {
-            let html = '<form id="reviewForm" method="POST" action="submit_review.php">';
-            html += '<input type="hidden" name="order_id" value="' + orderId + '">';
-            html += '<div class="space-y-6">';
-            
-            items.forEach(item => {
-                html += `
-                    <div class="border rounded-lg p-4 hover:shadow-md transition">
-                        <div class="flex gap-4 mb-4">
-                            <img src="${item.image}" alt="${item.product_name}" class="w-20 h-20 object-cover rounded-lg">
-                            <div class="flex-1">
-                                <h4 class="font-bold text-gray-800">${item.product_name}</h4>
-                                <p class="text-sm text-gray-500">Số lượng: ${item.quantity}</p>
-                            </div>
-                        </div>
-                        
-                        <input type="hidden" name="product_ids[]" value="${item.product_id}">
-                        
-                        <div class="mb-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Đánh giá sao</label>
-                            <div class="flex gap-2" id="stars_${item.product_id}">
-                                ${[1,2,3,4,5].map(star => `
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="rating_${item.product_id}" value="${star}" required class="hidden" 
-                                               onchange="updateStars(${item.product_id}, ${star})">
-                                        <i class="fas fa-star text-3xl text-gray-300 hover:text-yellow-400 transition star-icon"></i>
-                                    </label>
-                                `).join('')}
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Nhận xét của bạn</label>
-                            <textarea name="comment_${item.product_id}" rows="3" 
-                                      class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                      placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."></textarea>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += '</div>';
-            html += `
-                <div class="mt-6 flex justify-end gap-2">
-                    <button type="button" onclick="closeReviewModal()" 
-                            class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
-                        <i class="fas fa-times"></i> Hủy
-                    </button>
-                    <button type="submit" 
-                            class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
-                        <i class="fas fa-paper-plane"></i> Gửi đánh giá
-                    </button>
-                </div>
-            `;
-            html += '</form>';
-            
-            document.getElementById('reviewContent').innerHTML = html;
-        }
-        
-        function updateStars(productId, rating) {
-            const container = document.getElementById('stars_' + productId);
-            const stars = container.querySelectorAll('.star-icon');
-            
-            stars.forEach((star, index) => {
-                if (index < rating) {
-                    star.classList.remove('text-gray-300');
-                    star.classList.add('text-yellow-500');
-                } else {
-                    star.classList.remove('text-yellow-500');
-                    star.classList.add('text-gray-300');
-                }
-            });
-        }
-        
-        function closeReviewModal() {
-            document.getElementById('reviewModal').classList.add('hidden');
-        }
-        
         function cancelOrder(orderId, orderCode) {
             // Hiển thị modal xác nhận với thông tin chi tiết
             const confirmMessage = `Bạn có chắc muốn hủy đơn hàng "${orderCode}"?\n\n` +
@@ -642,10 +511,6 @@ $stats = [
         // Đóng modal khi click bên ngoài
         document.getElementById('orderDetailModal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
-        });
-        
-        document.getElementById('reviewModal').addEventListener('click', function(e) {
-            if (e.target === this) closeReviewModal();
         });
     </script>
 

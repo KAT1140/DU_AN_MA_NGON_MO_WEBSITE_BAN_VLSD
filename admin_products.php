@@ -21,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $sku = $_POST['sku'] ?? '';
         $category_id = (int)($_POST['category_id'] ?? 0);
         $supplier_id = (int)($_POST['supplier_id'] ?? 0);
+        $supplier_id = $supplier_id > 0 ? $supplier_id : null;
         $price = (float)($_POST['price'] ?? 0);
         $sale_price = (float)($_POST['sale_price'] ?? 0);
         $cost_price = (float)($_POST['cost_price'] ?? 0);
@@ -83,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $sku = $_POST['sku'] ?? '';
         $category_id = (int)($_POST['category_id'] ?? 0);
         $supplier_id = (int)($_POST['supplier_id'] ?? 0);
+        $supplier_id = $supplier_id > 0 ? $supplier_id : null;
         $price = (float)($_POST['price'] ?? 0);
         $sale_price = (float)($_POST['sale_price'] ?? 0);
         $cost_price = (float)($_POST['cost_price'] ?? 0);
@@ -160,15 +162,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if ($product_id <= 0) {
             $error = '❌ ID sản phẩm không hợp lệ';
         } else {
-            $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
-            if ($stmt) {
-                $stmt->bind_param('i', $product_id);
-                if ($stmt->execute()) {
-                    $msg = '✅ Xóa sản phẩm thành công!';
-                } else {
-                    $error = '❌ Lỗi: ' . $stmt->error;
+            // Kiểm tra xem sản phẩm có trong đơn hàng không
+            $check = $conn->prepare("SELECT COUNT(*) as count FROM order_items WHERE product_id = ?");
+            $check->bind_param('i', $product_id);
+            $check->execute();
+            $result = $check->get_result()->fetch_assoc();
+            $check->close();
+            
+            if ($result['count'] > 0) {
+                $error = '❌ Không thể xóa! Sản phẩm này đã có trong ' . $result['count'] . ' đơn hàng.';
+            } else {
+                $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
+                if ($stmt) {
+                    $stmt->bind_param('i', $product_id);
+                    if ($stmt->execute()) {
+                        $msg = '✅ Xóa sản phẩm thành công!';
+                    } else {
+                        $error = '❌ Lỗi: ' . $stmt->error;
+                    }
+                    $stmt->close();
                 }
-                $stmt->close();
             }
         }
     }
@@ -216,7 +229,7 @@ if (!empty($status_filter)) {
 
 $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
-$sql = "SELECT p.id, p.NAME, p.sku, p.price, p.quantity, c.NAME as category, s.NAME as supplier, p.created_at
+$sql = "SELECT p.*, c.NAME as category, s.NAME as supplier
         FROM products p 
         LEFT JOIN categories c ON c.id = p.category_id 
         LEFT JOIN suppliers s ON s.id = p.supplier_id 
@@ -244,41 +257,47 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 min-h-screen">
-  <div class="max-w-7xl mx-auto p-6">
+<body class="bg-gray-50">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-4xl font-bold text-gray-800 mb-2"><i class="fas fa-boxes"></i> Quản lý sản phẩm</h1>
-        <p class="text-gray-600">Thêm, sửa và xóa sản phẩm</p>
-      </div>
-      <div class="space-x-2">
-        <a href="profile.php" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition font-bold">
-          <i class="fas fa-user"></i> Hồ sơ cá nhân
-        </a>
-        <a href="admin.php" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
-          <i class="fas fa-users"></i> Quản lý người dùng
-        </a>
-        <a href="admin_orders.php" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition relative">
-          <i class="fas fa-shopping-cart"></i> Đơn hàng
-          <?php if ($pending_orders > 0): ?>
-              <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                  <?= $pending_orders ?>
-              </span>
-          <?php endif; ?>
-        </a>
-        <a href="index.php" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
-          <i class="fas fa-home"></i> Trang chủ
-        </a>
-      </div>
-    </div>
+    <header class="bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-xl sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-boxes text-2xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold">Quản Lý Sản Phẩm</h1>
+                </div>
+                <nav class="flex items-center gap-3">
+                    <a href="admin.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="admin_products.php" class="bg-white bg-opacity-20 px-3 py-2 rounded-lg font-semibold">
+                        <i class="fas fa-boxes"></i> Sản phẩm
+                    </a>
+                    <a href="admin_orders.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+                        <i class="fas fa-shopping-cart"></i> Đơn hàng
+                    </a>
+                    <a href="admin_suppliers.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+                        <i class="fas fa-truck"></i> Nhà phân phối
+                    </a>
+                    <a href="index.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+                        <i class="fas fa-home"></i> Trang chủ
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
 
-    <!-- Messages -->
+  <div class="max-w-7xl mx-auto p-6">
+
+    <!-- Thông báo -->
+    <!-- Thông báo -->
     <?php if ($msg): ?>
-      <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded"><?= $msg ?></div>
+      <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded"><i class="fas fa-check-circle"></i> <?= $msg ?></div>
     <?php endif; ?>
     <?php if ($error): ?>
-      <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded"><?= $error ?></div>
+      <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded"><i class="fas fa-exclamation-circle"></i> <?= $error ?></div>
     <?php endif; ?>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -446,13 +465,29 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
                   <th class="px-4 py-3 text-left">SKU</th>
                   <th class="px-4 py-3 text-center">Giá</th>
                   <th class="px-4 py-3 text-center">Tồn kho</th>
-                  <th class="px-4 py-3 text-center">Hành động</th>
                 </tr>
               </thead>
               <tbody>
                 <?php if ($products && $products->num_rows > 0): ?>
-                  <?php while ($p = $products->fetch_assoc()): ?>
-                    <tr class="border-b hover:bg-gray-50">
+                  <?php while ($p = $products->fetch_assoc()): 
+                    // Chuẩn bị data để truyền vào JS, loại bỏ trường trùng tên
+                    $productData = [
+                      'id' => $p['id'],
+                      'NAME' => $p['NAME'],
+                      'sku' => $p['sku'],
+                      'category_id' => $p['category_id'],
+                      'supplier_id' => $p['supplier_id'],
+                      'price' => $p['price'],
+                      'sale_price' => $p['sale_price'],
+                      'cost_price' => $p['cost_price'],
+                      'quantity' => $p['quantity'],
+                      'unit' => $p['unit'],
+                      'short_description' => $p['short_description'],
+                      'description' => $p['description'],
+                      'images' => $p['images']
+                    ];
+                  ?>
+                    <tr class="border-b hover:bg-gray-50 cursor-pointer transition" onclick='openEditModal(<?= json_encode($productData) ?>)'>
                       <td class="px-4 py-3 font-bold text-purple-600">#<?= $p['id'] ?></td>
                       <td class="px-4 py-3">
                         <div class="font-bold"><?= htmlspecialchars($p['NAME']) ?></div>
@@ -465,24 +500,11 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
                           <?= $p['quantity'] ?>
                         </span>
                       </td>
-                      <td class="px-4 py-3 text-center">
-                        <button class="edit-product-btn bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition text-xs" 
-                                data-product='<?= json_encode($p) ?>'>
-                          <i class="fas fa-edit"></i> Sửa
-                        </button>
-                        <form method="POST" class="inline-block" onsubmit="return confirm('Bạn chắc chắn muốn xóa?');">
-                          <input type="hidden" name="action" value="delete_product">
-                          <input type="hidden" name="product_id" value="<?= $p['id'] ?>">
-                          <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition text-xs">
-                            <i class="fas fa-trash"></i> Xóa
-                          </button>
-                        </form>
-                      </td>
                     </tr>
                   <?php endwhile; ?>
                 <?php else: ?>
                   <tr>
-                    <td colspan="6" class="px-4 py-6 text-center text-gray-500">Chưa có sản phẩm nào</td>
+                    <td colspan="5" class="px-4 py-6 text-center text-gray-500">Chưa có sản phẩm nào</td>
                   </tr>
                 <?php endif; ?>
               </tbody>
@@ -516,8 +538,8 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
           <label class="block text-sm font-bold text-gray-700 mb-2">Danh mục *</label>
           <select name="category_id" id="editCategory" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
             <?php 
-            $categories = $conn->query("SELECT id, NAME FROM categories WHERE STATUS = 1 ORDER BY NAME");
-            while ($cat = $categories->fetch_assoc()): 
+            $categories_edit = $conn->query("SELECT id, NAME FROM categories WHERE STATUS = 1 ORDER BY NAME");
+            while ($cat = $categories_edit->fetch_assoc()): 
             ?>
               <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['NAME']) ?></option>
             <?php endwhile; ?>
@@ -529,8 +551,8 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
           <select name="supplier_id" id="editSupplier" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
             <option value="">-- Chọn nhà cung cấp --</option>
             <?php 
-            $suppliers = $conn->query("SELECT id, NAME FROM suppliers WHERE STATUS = 1 ORDER BY NAME");
-            while ($sup = $suppliers->fetch_assoc()): 
+            $suppliers_edit = $conn->query("SELECT id, NAME FROM suppliers WHERE STATUS = 1 ORDER BY NAME");
+            while ($sup = $suppliers_edit->fetch_assoc()): 
             ?>
               <option value="<?= $sup['id'] ?>"><?= htmlspecialchars($sup['NAME']) ?></option>
             <?php endwhile; ?>
@@ -586,13 +608,20 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
           <div id="currentImages" class="grid grid-cols-5 gap-2 mt-3"></div>
         </div>
         
-        <div class="col-span-2 flex gap-3 mt-4">
-          <button type="button" onclick="closeEditModal()" class="flex-1 bg-gray-400 text-white py-3 rounded-lg hover:bg-gray-500 transition font-bold">
-            Hủy
-          </button>
-          <button type="submit" class="flex-1 bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition font-bold">
-            <i class="fas fa-save"></i> Cập nhật
-          </button>
+        <div class="col-span-2 space-y-3 mt-4">
+          <div class="flex gap-3">
+            <button type="submit" class="flex-1 bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition font-bold">
+              <i class="fas fa-save"></i> Cập nhật
+            </button>
+            <button type="button" onclick="closeEditModal()" class="flex-1 bg-gray-400 text-white py-3 rounded-lg hover:bg-gray-500 transition font-bold">
+              <i class="fas fa-times"></i> Hủy
+            </button>
+          </div>
+          <div class="flex justify-center">
+            <button type="button" onclick="deleteCurrentProduct()" class="w-1/2 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition font-bold">
+              <i class="fas fa-trash"></i> Xóa sản phẩm
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -660,6 +689,8 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
     }
     
     function openEditModal(product) {
+      console.log('Product data:', product); // Debug
+      
       document.getElementById('editProductId').value = product.id;
       document.getElementById('editName').value = product.NAME;
       document.getElementById('editSku').value = product.sku;
@@ -702,6 +733,22 @@ $pending_orders = $conn->query("SELECT COUNT(*) as count FROM orders WHERE order
 
     function closeEditModal() {
       document.getElementById('editProductModal').classList.add('hidden');
+    }
+    
+    function deleteCurrentProduct() {
+      const productId = document.getElementById('editProductId').value;
+      const productName = document.getElementById('editName').value;
+      
+      if (confirm(`Bạn có chắc muốn xóa sản phẩm "${productName}"?\n\nHành động này không thể hoàn tác!`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `
+          <input type="hidden" name="action" value="delete_product">
+          <input type="hidden" name="product_id" value="${productId}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+      }
     }
     
     function openModal(productId, productName, currentQty) {

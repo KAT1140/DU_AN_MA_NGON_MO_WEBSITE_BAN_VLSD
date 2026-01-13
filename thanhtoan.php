@@ -106,22 +106,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thanh Toán - VLXD KAT</title>
-    </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto p-8 max-w-7xl">
-        <h1 class="text-3xl font-bold mb-8 text-gray-800">Xác Nhận Thanh Toán Đơn Hàng</h1>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-purple-500 to-blue-500 text-white sticky top-0 z-50 shadow-xl">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.php" class="flex items-center gap-3 hover:opacity-90 transition">
+                <img src="uploads/logo.png" alt="VLXD Logo" class="w-12 h-12 object-cover rounded-full">
+                <h1 class="text-2xl font-bold">VLXD KAT</h1>
+            </a>
+            <div class="flex items-center gap-6">
+                <nav class="flex items-center gap-4">
+                    <a href="index.php" class="text-white hover:text-purple-200 transition">
+                        <i class="fas fa-home"></i> Trang chủ
+                    </a>
+                    <a href="cart.php" class="text-white hover:text-purple-200 transition">
+                        <i class="fas fa-shopping-cart"></i> Giỏ hàng
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+    
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">
+                <i class="fas fa-credit-card"></i> Xác Nhận Thanh Toán
+            </h1>
+            <p class="text-gray-600 mt-2">Vui lòng kiểm tra thông tin và hoàn tất đơn hàng</p>
+        </div>
         
         <?php if (!empty($errors)): ?>
-            <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                <?php foreach($errors as $err) echo "<p>⚠️ $err</p>"; ?>
+            <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
+                <?php foreach($errors as $err) echo "<p class='flex items-center gap-2'><i class='fas fa-exclamation-circle'></i> $err</p>"; ?>
             </div>
         <?php endif; ?>
 
-        <div class="flex flex-wrap -mx-4">
-            <div class="w-full lg:w-2/3 px-4 mb-6">
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h2 class="text-xl font-semibold mb-6 border-b pb-2">1. Thông tin Giao hàng</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h2 class="text-xl font-bold mb-6 pb-3 border-b flex items-center gap-2">
+                        <i class="fas fa-shipping-fast text-purple-600"></i>
+                        1. Thông tin Giao hàng
+                    </h2>
                     <form method="POST">
                         
                         <div class="mb-4">
@@ -144,29 +176,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 class="mt-1 block w-full border border-gray-300 p-2 rounded-md shadow-sm"><?= htmlspecialchars($_POST['shipping_address'] ?? $user_info['address'] ?? '') ?></textarea>
                         </div>
                         
-                        <h2 class="text-xl font-semibold mb-6 border-b pb-2">2. Phương thức Thanh toán</h2>
+                        <h2 class="text-xl font-bold mb-6 pb-3 border-b flex items-center gap-2">
+                            <i class="fas fa-wallet text-purple-600"></i>
+                            2. Phương thức Thanh toán
+                        </h2>
                         
-                        <div class="space-y-4">
-                            <label class="flex items-center p-3 border rounded-lg bg-indigo-50">
-                                <input type="radio" name="payment_method" value="COD" checked class="form-radio text-indigo-600">
-                                <span class="ml-3 font-medium">Thanh toán khi nhận hàng (COD)</span>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-purple-50 transition border-purple-500 bg-purple-50">
+                                <input type="radio" name="payment_method" value="COD" checked class="w-5 h-5 text-purple-600">
+                                <span class="ml-3 font-semibold text-gray-800">
+                                    <i class="fas fa-money-bill-wave text-green-600"></i>
+                                    Thanh toán khi nhận hàng (COD)
+                                </span>
                             </label>
-                            <label class="flex items-center p-3 border rounded-lg">
-                                <input type="radio" name="payment_method" value="BANK" class="form-radio text-indigo-600">
-                                <span class="ml-3 font-medium">Chuyển khoản Ngân hàng (Thanh toán trước)</span>
+                            <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-purple-50 transition">
+                                <input type="radio" name="payment_method" value="BANK" class="w-5 h-5 text-purple-600">
+                                <span class="ml-3 font-semibold text-gray-800">
+                                    <i class="fas fa-university text-blue-600"></i>
+                                    Chuyển khoản Ngân hàng
+                                </span>
                             </label>
                         </div>
 
-                        <button type="submit" class="mt-10 w-full bg-purple-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-purple-700 transition duration-150">
-                            HOÀN TẤT ĐẶT HÀNG (<?= number_format($grand_total) ?> VNĐ)
+                        <button type="submit" class="mt-8 w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg transition duration-200 flex items-center justify-center gap-2">
+                            <i class="fas fa-check-circle"></i>
+                            HOÀN TẤT ĐẶT HÀNG (<?= number_format($grand_total) ?>₫)
                         </button>
                     </form>
                 </div>
             </div>
 
-            <div class="w-full lg:w-1/3 px-4">
-                <div class="bg-white p-6 rounded-lg shadow-md sticky top-6">
-                    <h2 class="text-xl font-semibold mb-4 border-b pb-2">3. Tóm tắt Đơn hàng</h2>
+            <div class="lg:col-span-1">
+                <div class="bg-white p-6 rounded-xl shadow-md sticky top-24">
+                    <h2 class="text-xl font-bold mb-6 pb-3 border-b flex items-center gap-2">
+                        <i class="fas fa-shopping-bag text-purple-600"></i>
+                        3. Tóm tắt Đơn hàng
+                    </h2>
                     
                     <div class="mb-4 max-h-60 overflow-y-auto border-b pb-4">
                         <?php foreach ($cart as $item): ?>

@@ -234,20 +234,35 @@ if (!empty($params)) {
 <body class="bg-gray-50">
     
     <!-- Header -->
-    <nav class="bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-lg">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <a href="admin.php" class="text-2xl font-bold">
-                        <i class="fas fa-tools"></i> VLXD Admin
+    <header class="bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-xl sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-shopping-cart text-2xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold">Quản Lý Đơn Hàng</h1>
+                </div>
+                <nav class="flex items-center gap-3">
+                    <a href="admin.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
-                    <div class="hidden md:flex gap-2">
-                        <a href="admin.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
-                            <i class="fas fa-users"></i> Người dùng
-                        </a>
-                        <a href="admin_products.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
-                            <i class="fas fa-box"></i> Sản phẩm
-                        </a>
+                    <a href="admin_products.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+                        <i class="fas fa-boxes"></i> Sản phẩm
+                    </a>
+                    <a href="admin_orders.php" class="bg-white bg-opacity-20 px-3 py-2 rounded-lg font-semibold">
+                        <i class="fas fa-shopping-cart"></i> Đơn hàng
+                    </a>
+                    <a href="admin_suppliers.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+                        <i class="fas fa-truck"></i> Nhà phân phối
+                    </a>
+                    <a href="index.php" class="text-white hover:text-purple-200 transition px-3 py-2 rounded-lg hover:bg-white hover:bg-opacity-10">
+                        <i class="fas fa-home"></i> Trang chủ
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
                         <a href="admin_orders.php" class="px-4 py-2 rounded bg-purple-700 relative">
                             <i class="fas fa-shopping-cart"></i> Đơn hàng
                             <?php if ($pending_orders > 0): ?>

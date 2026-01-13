@@ -36,26 +36,6 @@ if (!empty($product['image'])) {
 }
 $specifications = json_decode($product['specifications'], true) ?: [];
 
-// Lấy đánh giá sản phẩm (chỉ lấy đánh giá đã duyệt)
-$review_sql = "SELECT r.*, u.full_name, u.email 
-               FROM reviews r 
-               LEFT JOIN users u ON r.user_id = u.id 
-               WHERE r.product_id = ? AND r.status = 'approved'
-               ORDER BY r.created_at DESC";
-$review_stmt = $conn->prepare($review_sql);
-$review_stmt->bind_param("i", $product_id);
-$review_stmt->execute();
-$reviews = $review_stmt->get_result();
-
-// Tính điểm đánh giá trung bình (chỉ tính đánh giá đã duyệt)
-$avg_sql = "SELECT AVG(rating) as avg_rating, COUNT(*) as total_reviews FROM reviews WHERE product_id = ? AND status = 'approved'";
-$avg_stmt = $conn->prepare($avg_sql);
-$avg_stmt->bind_param("i", $product_id);
-$avg_stmt->execute();
-$avg_result = $avg_stmt->get_result()->fetch_assoc();
-$avg_rating = round($avg_result['avg_rating'] ?? 0, 1);
-$total_reviews = $avg_result['total_reviews'] ?? 0;
-
 // Sản phẩm liên quan (cùng danh mục)
 $related_sql = "SELECT id, NAME, price, sale_price, image, images 
                 FROM products 
@@ -159,18 +139,6 @@ $related_products = $related_stmt->get_result();
             <div>
                 <div class="bg-white rounded-xl shadow-lg p-8">
                     <h1 class="text-3xl font-bold text-gray-800 mb-4"><?= htmlspecialchars($product['NAME']) ?></h1>
-                    
-                    <!-- Đánh giá -->
-                    <?php if ($total_reviews > 0): ?>
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="flex text-yellow-400">
-                                <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <i class="fas fa-star <?= $i <= $avg_rating ? '' : 'text-gray-300' ?>"></i>
-                                <?php endfor; ?>
-                            </div>
-                            <span class="text-gray-600"><?= $avg_rating ?>/5 (<?= $total_reviews ?> đánh giá)</span>
-                        </div>
-                    <?php endif; ?>
 
                     <!-- Giá -->
                     <div class="mb-6">
@@ -247,9 +215,6 @@ $related_products = $related_stmt->get_result();
                             Thông số kỹ thuật
                         </button>
                     <?php endif; ?>
-                    <button onclick="showTab('reviews')" id="review-tab" class="pb-4 border-b-2 border-transparent text-gray-600 hover:text-purple-500">
-                        Đánh giá (<?= $total_reviews ?>)
-                    </button>
                 </nav>
             </div>
 

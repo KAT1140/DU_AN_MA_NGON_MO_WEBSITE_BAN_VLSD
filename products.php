@@ -244,64 +244,6 @@ header('Content-Type: text/html; charset=utf-8');
           }
           ?>
 
-          <?php if (!empty($related_products)): ?>
-          <div class="mt-12 border-t pt-8">
-              <div class="mb-6 flex items-center gap-3">
-                  <h3 class="text-2xl font-bold text-gray-800">
-                      <i class="fas fa-lightbulb text-yellow-500"></i> Sản phẩm liên quan - <?= htmlspecialchars($related_title) ?>
-                  </h3>
-                  <span class="bg-yellow-50 text-yellow-600 px-3 py-1 rounded-lg text-sm font-semibold">
-                      Gợi ý cho bạn
-                  </span>
-              </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <?php foreach ($related_products as $related): 
-                      $related_images = json_decode($related['images'], true);
-                      $related_image_url = !empty($related_images) ? $related_images[0] : 'https://via.placeholder.com/300x300?text=No+Image';
-                      $related_price = $related['sale_price'] > 0 ? $related['sale_price'] : $related['price'];
-                  ?>
-                      <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg shadow-md hover:shadow-xl transition overflow-hidden group flex flex-col h-full border-2 border-yellow-200">
-                          <div class="relative h-48 bg-gray-100">
-                              <img src="<?= htmlspecialchars($related_image_url) ?>" class="w-full h-full object-cover">
-                              <span class="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-bold">
-                                  <i class="fas fa-star"></i> Gợi ý
-                              </span>
-                              <?php if ($related['quantity'] > 0): ?>
-                                  <span class="absolute bottom-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs"><i class="fas fa-check"></i> Còn hàng</span>
-                              <?php else: ?>
-                                  <span class="absolute bottom-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs">Hết hàng</span>
-                              <?php endif; ?>
-                          </div>
-
-                          <div class="p-4 flex-grow">
-                              <h4 class="font-bold text-gray-800 mb-2 line-clamp-2"><?= htmlspecialchars($related['NAME']) ?></h4>
-                              <div class="flex items-center gap-2 mb-3">
-                                  <span class="text-xl font-bold text-purple-500"><?= number_format($related_price, 0, ',', '.') ?>đ</span>
-                                  <?php if($related['sale_price'] > 0 && $related['sale_price'] < $related['price']): ?>
-                                      <span class="text-sm text-gray-400 line-through"><?= number_format($related['price'], 0, ',', '.') ?>đ</span>
-                                  <?php endif; ?>
-                              </div>
-                          </div>
-
-                          <div class="p-4 pt-0 mt-auto flex gap-2">
-                              <form action="add_to_cart.php" method="POST" class="flex-1 add-to-cart-form">
-                                  <input type="hidden" name="product_id" value="<?= $related['id'] ?>">
-                                  <input type="hidden" name="quantity" value="1">
-                                  <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded hover:from-purple-600 hover:to-blue-600 transition flex items-center justify-center gap-2">
-                                      <i class="fas fa-shopping-cart"></i> Thêm
-                                  </button>
-                              </form>
-                              <a href="#" class="border border-yellow-500 text-yellow-600 px-4 py-2 rounded hover:bg-yellow-50 transition flex items-center gap-2">
-                                  <i class="fas fa-eye"></i> Xem
-                              </a>
-                          </div>
-                      </div>
-                  <?php endforeach; ?>
-              </div>
-          </div>
-          <?php endif; ?>
-
          <?php if ($total_pages > 1): ?>
             <div class="flex justify-center gap-2 mt-8">
               <?php for ($i = 1; $i <= $total_pages; $i++): 

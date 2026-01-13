@@ -130,7 +130,6 @@ header('Content-Type: text/html; charset=utf-8');
           echo "<span id='cart-count' class='absolute -top-2 -right-2 bg-white text-purple-600 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md $hiddenClass'>{$count}</span>";
           ?>
         </a>
-        </a>
       </div>
     </div>
   </header>
@@ -247,17 +246,15 @@ header('Content-Type: text/html; charset=utf-8');
       // --- LOGIC: Sản phẩm đề xuất (Bán nhiều + Đánh giá tốt) ---
       $sql = "SELECT p.id, p.NAME, p.price, p.sale_price, p.images, 
                      COALESCE(SUM(oi.quantity), 0) as total_sold,
-                     COALESCE(AVG(r.rating), 0) as avg_rating,
-                     COALESCE(COUNT(DISTINCT r.id), 0) as review_count
+                     COALESCE(COUNT(DISTINCT oi.id), 0) as total_sold
               FROM products p
               LEFT JOIN order_items oi ON p.id = oi.product_id
               LEFT JOIN orders o ON oi.order_id = o.id AND (o.order_status IS NULL OR o.order_status != 'cancelled')
-              LEFT JOIN reviews r ON p.id = r.product_id
               WHERE p.STATUS = 'active'";
 
       $sql .= " GROUP BY p.id";
-      // Sắp xếp theo: đánh giá trung bình cao, sau đó số lượng bán nhiều
-      $sql .= " ORDER BY avg_rating DESC, total_sold DESC, p.created_at DESC LIMIT 8";
+      // Sắp xếp theo: số lượng bán nhiều
+      $sql .= " ORDER BY total_sold DESC, p.created_at DESC LIMIT 8";
 
       $result = $conn->query($sql);
 
@@ -342,8 +339,8 @@ header('Content-Type: text/html; charset=utf-8');
         <h4 class="text-xl font-bold mb-4">Liên hệ</h4>
         <ul class="space-y-2 text-gray-400">
           <li><i class="fas fa-phone"></i> Hotline: 1900 xxxx</li>
-          <li><i class="fas fa-envelope"></i> Email: contact@vlxdkat.vn</li>
-          <li><i class="fas fa-map-marker-alt"></i> Địa chỉ: Hà Nội, Việt Nam</li>
+          <li><i class="fas fa-envelope"></i> Email: vlxdkat@gmail.com</li>
+          <li><i class="fas fa-map-marker-alt"></i> Địa chỉ: 126 Nguyễn Thiện Thành, Phường 5, Trà Vinh, Việt Nam</li>
         </ul>
       </div>
     </div>

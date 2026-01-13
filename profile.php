@@ -65,23 +65,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
     <!-- Header Navigation -->
-    <header class="bg-white sticky top-0 z-50 shadow-md">
+    <header class="bg-gradient-to-r from-purple-600 to-blue-500 sticky top-0 z-50 shadow-lg">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <a href="index.php" class="flex items-center gap-3 hover:opacity-80 transition">
-                <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-500 rounded-lg flex items-center justify-center">
+                <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
                     <span class="text-white text-lg font-black">VL</span>
                 </div>
-                <h1 class="text-xl font-black text-gray-800">VLXD PRO</h1>
+                <h1 class="text-xl font-black text-white">VLXD PRO</h1>
             </a>
             
             <nav class="flex gap-2">
-                <a href="index.php" class="text-gray-700 hover:text-purple-600 transition font-bold">
+                <a href="index.php" class="text-white hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-lg transition font-bold text-sm">
                     <i class="fas fa-home"></i> Trang chủ
                 </a>
-                <a href="cart.php" class="text-gray-700 hover:text-purple-600 transition font-bold">
+                <a href="cart.php" class="text-white hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-lg transition font-bold text-sm">
                     <i class="fas fa-shopping-cart"></i> Giỏ hàng
                 </a>
-                <a href="logout.php" class="text-red-600 hover:text-red-700 transition font-bold">
+                <a href="logout.php" class="text-white hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-lg transition font-bold text-sm">
                     <i class="fas fa-sign-out-alt"></i> Đăng xuất
                 </a>
             </nav>
@@ -161,19 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="pt-4 border-t space-y-2">
                                 <p class="text-xs text-gray-500 font-bold uppercase">Quản lý</p>
                                 <a href="admin.php" class="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg transition font-bold text-sm">
-                                    <i class="fas fa-users"></i> Người dùng
-                                </a>
-                                <a href="admin_products.php" class="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-2 rounded-lg transition font-bold text-sm">
-                                    <i class="fas fa-boxes"></i> Sản phẩm
-                                </a>
-                                <a href="admin_orders.php" class="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 px-4 py-2 rounded-lg transition font-bold text-sm">
-                                    <i class="fas fa-shopping-cart"></i> Đơn hàng
-                                </a>
-                                <a href="admin_suppliers.php" class="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg transition font-bold text-sm">
-                                    <i class="fas fa-truck"></i> Nhà phân phối
-                                </a>
-                                <a href="inventory_management.php" class="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-2 rounded-lg transition font-bold text-sm">
-                                    <i class="fas fa-warehouse"></i> Kho hàng
+                                    <i class="fas fa-cogs"></i> Quản trị hệ thống
                                 </a>
                             </div>
                         <?php endif; ?>
@@ -262,15 +250,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
     </style>
-</body>
-</html>
-        <?php if ($_SESSION['user_role'] === 'admin'): ?>
-            <div class="mt-4">
-                <a href="admin.php" class="block w-full text-center bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">
-                    ⚙️ Quản trị hệ thống
-                </a>
-            </div>
-        <?php endif; ?>
-    </div>
 </body>
 </html>
