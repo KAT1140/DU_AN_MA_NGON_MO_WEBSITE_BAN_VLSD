@@ -108,29 +108,39 @@ $stats = [
 <body class="bg-gray-50">
 
     <!-- Header -->
-    <nav class="bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-lg">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <a href="index.php" class="text-2xl font-bold">
-                        <i class="fas fa-tools"></i> VLXD KAT
-                    </a>
-                    <span class="text-sm opacity-80">Đơn hàng của tôi</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <a href="index.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
+    <header class="bg-gradient-to-r from-purple-500 to-blue-500 text-white sticky top-0 z-50 shadow-xl">
+        <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+            <a href="index.php" class="flex items-center gap-4 hover:opacity-90 transition">
+                <img src="uploads/logo.png" alt="VLXD Logo" class="w-16 h-16 object-cover rounded-full">
+                <h1 class="text-3xl font-black">VLXD KAT</h1>
+            </a>
+            <div class="flex items-center gap-8">
+                <nav class="flex items-center gap-6">
+                    <a href="index.php" class="text-white font-bold hover:text-purple-200 transition text-lg flex items-center gap-2">
                         <i class="fas fa-home"></i> Trang chủ
                     </a>
-                    <a href="cart.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
-                        <i class="fas fa-shopping-cart"></i> Giỏ hàng
+                    <a href="products.php" class="text-white font-bold hover:text-purple-200 transition text-lg flex items-center gap-2">
+                        <i class="fas fa-box"></i> Sản phẩm
                     </a>
-                    <a href="profile.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
-                        <i class="fas fa-user"></i> Tài khoản
-                    </a>
+                </nav>
+                
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3">
+                        <a href="profile.php" class="text-white font-bold hover:text-purple-200 transition text-lg">
+                            👤 <?= htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['user_email']) ?>
+                        </a>
+                        <a href="logout.php" class="bg-red-600 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition">
+                            Đăng xuất
+                        </a>
+                    </div>
                 </div>
+
+                <a href="cart.php" class="relative group">
+                    <span class="text-3xl group-hover:scale-110 transition inline-block">🛒</span>
+                </a>
             </div>
         </div>
-    </nav>
+    </header>
 
     <div class="container mx-auto px-4 py-8">
         

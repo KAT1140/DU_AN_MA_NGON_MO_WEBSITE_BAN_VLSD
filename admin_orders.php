@@ -263,28 +263,6 @@ if (!empty($params)) {
             </div>
         </div>
     </header>
-                        <a href="admin_orders.php" class="px-4 py-2 rounded bg-purple-700 relative">
-                            <i class="fas fa-shopping-cart"></i> Đơn hàng
-                            <?php if ($pending_orders > 0): ?>
-                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                                    <?= $pending_orders ?>
-                                </span>
-                            <?php endif; ?>
-                        </a>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <span class="hidden md:inline"><?= htmlspecialchars($_SESSION['user_name']) ?></span>
-                    <a href="index.php" class="px-4 py-2 rounded hover:bg-purple-700 transition">
-                        <i class="fas fa-home"></i> Trang chủ
-                    </a>
-                    <a href="logout.php" class="px-4 py-2 bg-red-600 rounded hover:bg-red-700 transition">
-                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
 
     <div class="container mx-auto px-4 py-8">
         

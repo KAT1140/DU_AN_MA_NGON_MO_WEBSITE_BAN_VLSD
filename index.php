@@ -241,15 +241,15 @@ header('Content-Type: text/html; charset=utf-8');
 
     <div class="product-grid">
       <?php
-      $cat_id = '';
-
       // --- LOGIC: Sản phẩm đề xuất (Bán nhiều + Đánh giá tốt) ---
       $sql = "SELECT p.id, p.NAME, p.price, p.sale_price, p.images, 
                      COALESCE(SUM(oi.quantity), 0) as total_sold,
-                     COALESCE(COUNT(DISTINCT oi.id), 0) as total_sold
+                     COALESCE(AVG(r.rating), 0) as avg_rating,
+                     COALESCE(COUNT(DISTINCT r.id), 0) as review_count
               FROM products p
               LEFT JOIN order_items oi ON p.id = oi.product_id
               LEFT JOIN orders o ON oi.order_id = o.id AND (o.order_status IS NULL OR o.order_status != 'cancelled')
+              LEFT JOIN reviews r ON p.id = r.product_id AND r.status = 'approved'
               WHERE p.STATUS = 'active'";
 
       $sql .= " GROUP BY p.id";

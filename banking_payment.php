@@ -30,9 +30,10 @@ $order = $order_result->fetch_assoc();
 $order_stmt->close();
 
 // Thông tin ngân hàng
+// TODO: Cập nhật số tài khoản ngân hàng thực tế
 $bank_info = [
     'bank_name' => 'Ngân hàng TMCP Quân Đội (MB Bank)',
-    'account_number' => '0379648264',
+    'account_number' => '1234567890',  // Cần thay bằng số tài khoản thực tế
     'account_name' => 'VO NHAT DUY NAM',
     'branch' => 'MB Bank'
 ];

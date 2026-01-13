@@ -162,7 +162,7 @@ header('Content-Type: text/html; charset=utf-8');
         <?php else: ?>
          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <?php while ($product = $result->fetch_assoc()): 
-                $images = json_decode($product['images'], true);
+                $images = json_decode($product['images'], true) ?: [];
                 $image_url = 'https://via.placeholder.com/300x300?text=No+Image';
                 if (!empty($images)) {
                     // Kiểm tra xem đường dẫn đã có 'uploads/' chưa

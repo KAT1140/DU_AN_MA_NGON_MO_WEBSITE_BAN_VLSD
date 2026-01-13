@@ -1,4 +1,28 @@
-<?php require 'config.php'; ?>
+<?php 
+require 'config.php'; 
+
+// Xử lý xóa sản phẩm
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'remove') {
+    header('Content-Type: application/json');
+    
+    $ci_id = isset($_POST['ci_id']) ? intval($_POST['ci_id']) : 0;
+    
+    if ($ci_id > 0) {
+        $stmt = $conn->prepare("DELETE FROM cart_items WHERE id = ?");
+        $stmt->bind_param('i', $ci_id);
+        
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Đã xóa sản phẩm']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Lỗi khi xóa: ' . $stmt->error]);
+        }
+        $stmt->close();
+    } else {
+        echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
+    }
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -253,7 +277,40 @@
       }
     }
   </style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý xóa sản phẩm
+    document.querySelectorAll('.remove-item').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const ciId = this.dataset.ciId;
+            if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
+            
+            fetch('cart.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'action=remove&ci_id=' + ciId
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Lỗi khi xóa sản phẩm');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Lỗi kết nối');
+            });
+        });
+    });
+    
+    // Xử lý checkout
+    document.querySelector('.checkout-btn')?.addEventListener('click', () => {
+        window.location.href = 'checkout.php';
+    });
+});
+</script>
 <script src="assets/js/main.js"></script>
-<script src="assets/js/cart-page.js"></script>
 </body>
 </html>
